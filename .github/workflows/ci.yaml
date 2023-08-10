@@ -20,13 +20,13 @@ jobs:
 
     steps:
     - name: Checkout repository
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-    - uses: actions/setup-python@v4
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Configure AWS credentials
-    - uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: us-east-2
         role-to-assume: arn:aws:iam::185776040155:role/pyonda-ci
