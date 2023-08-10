@@ -4,14 +4,14 @@ import pyarrow as pa
 from pyonda.utils import download_s3_fileobj, arrow_to_processed_pandas
 
 
-def load_arrow_table_to_pandas(path_to_table, processed=True):
-    """Load arrow table into pandas dataframe with an optional processing step
+def load_arrow_table(path_to_table, processed_pandas=True):
+    """Load arrow table into pyarrow table or pandas dataframe with an optional processing step
 
     Parameters
     ----------
     path_to_table : str or Path
         path to arrow table
-    processed : bool, optional
+    processed_pandas : bool, optional
         if True apply arrow_to_processed_pandas to loaded table, by default True
 
     Returns
@@ -19,19 +19,19 @@ def load_arrow_table_to_pandas(path_to_table, processed=True):
     dataframe: pandas.DataFrame
         table contents loaded into a pandas DataFrame
     """
-    table = pa.ipc.open_file(pa.memory_map(path_to_table, 'r')).read_all()
-    dataframe = arrow_to_processed_pandas(table) if processed else table.to_pandas()
-    return dataframe
+    table = pa.ipc.open_file(pa.memory_map(str(path_to_table), 'r')).read_all()
+    table = arrow_to_processed_pandas(table) if processed_pandas else table
+    return table
 
 
-def load_arrow_table_from_s3_to_pandas(table_url,  processed=True):
+def load_arrow_table_from_s3(table_url,  processed_pandas=True):
     """Load arrow table from S3 into pandas dataframe with an optional processing step
 
     Parameters
     ----------
     table_url : str
         S3 URL to table
-    processed : bool, optional
+    processed_pandas : bool, optional
         if True apply arrow_to_processed_pandas to loaded table, by default True
 
     Returns
@@ -41,8 +41,8 @@ def load_arrow_table_from_s3_to_pandas(table_url,  processed=True):
     """
     table_buf = download_s3_fileobj(table_url)
     table = pa.ipc.open_file(table_buf).read_all()
-    dataframe = arrow_to_processed_pandas(table) if processed else table.to_pandas()
-    return dataframe
+    table = arrow_to_processed_pandas(table) if processed_pandas else table
+    return table
 
 
 def load_lpcm_file(path_to_file, sample_type, n_channels):
@@ -89,5 +89,3 @@ def load_lpcm_file_from_s3(file_url, sample_type, n_channels):
     full_length = len(np.memmap(file_buf, dtype=sample_type, mode='r'))
     data_memmap = np.memmap(file_buf, dtype=sample_type, mode='r', shape=(n_channels, full_length // n_channels), order='F')
     return np.copy(data_memmap)
-
-    

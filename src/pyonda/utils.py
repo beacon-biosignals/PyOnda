@@ -2,6 +2,7 @@ import io
 import boto3
 import uuid
 import zstandard
+import pyarrow as pa
 from pathlib import Path
 
 
@@ -130,16 +131,30 @@ def arrow_to_processed_pandas(table):
     table_schema = table.schema
     dataframe = table.to_pandas()
 
-    # Map UUID fields coming from Julia
+    
     def map_uuid(x):
         x = bytearray(x)
         x.reverse()
         return uuid.UUID(bytes=bytes(x), version=4)
         
     for schema_field in table_schema.names:
+
+        # Map UUID fields coming from Julia to UUID type
         if table_schema.field(schema_field).metadata is not None:
             metadata = {k.decode():v.decode() for k,v in table_schema.field(schema_field).metadata.items()}
+
             if metadata['ARROW:extension:name'] == 'JuliaLang.UUID':
                 dataframe[schema_field] = dataframe[schema_field].map(map_uuid)
+
+            if metadata['ARROW:extension:name'] == 'JuliaLang.TimeSpan':
+                dataframe[f'{schema_field}_start'] = dataframe[f'{schema_field}'].map(lambda x : x['start'])
+                dataframe[f'{schema_field}_stop'] = dataframe[f'{schema_field}'].map(lambda x : x['stop'])
+                dataframe.drop([f'{schema_field}'], axis=1, inplace=True)
+
+
+        # For a all columns where the value is the list, pass the type to pandas
+        # When dataframe is loaded from storage, the field should be mapped with ast.literal_eval to get back the list
+        if type(table.schema.field(schema_field).type) == pa.ListType:
+            dataframe[schema_field] = dataframe[schema_field].map(list)
 
     return dataframe
