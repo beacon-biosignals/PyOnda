@@ -31,7 +31,7 @@ def test_load_arrow_table():
     pd.testing.assert_frame_equal(df, df_expected)
 
 
-def test_load_arrow_table_from_s3_to_pandas(table_url,  processed=True):
+def test_load_arrow_table_from_s3_to_pandas():
     return 
 
 
@@ -49,5 +49,5 @@ def test_load_lpcm_file():
 
 
 
-def test_load_lpcm_file_from_s3(file_url, sample_type, n_channels):
+def test_load_lpcm_file_from_s3():
     return 
