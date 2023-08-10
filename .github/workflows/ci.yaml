@@ -29,7 +29,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::185776040155:role/pyonda_ci
+        role-to-assume: arn:aws:iam::185776040155:role/pyonda-ci
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
