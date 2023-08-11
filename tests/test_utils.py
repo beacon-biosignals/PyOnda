@@ -98,15 +98,16 @@ def test_decompress_zstandard_file_to_folder(tmpdir, lpcm_zst_file_path):
 def test_decompress_zstandard_file_to_stream(lpcm_zst_file_path):
     file_buf = decompress_zstandard_file_to_stream(lpcm_zst_file_path)
 
-    decompressed_data = np.ndarray(buffer = file_buf.getbuffer(), dtype = np.int16, shape = (19, 30720), order='F')
-    reference_data = np.copy(np.memmap(lpcm_zst_file_path.replace('.zst', '')))
+    decompressed_data = np.ndarray(buffer = file_buf.getbuffer(), dtype = np.int16, shape = (2, 77490), order='F')
+
+    reference_data = np.copy(np.memmap(lpcm_zst_file_path.replace('.zst', ''), dtype = np.int16, shape = (2, 77490), order='F'))
     assert np.array_equal(decompressed_data, reference_data)
 
 
 def test_decompress_zstandard_stream_to_file(tmpdir, lpcm_zst_file_path):
     output_file_path = Path(tmpdir) / "176ecfcf-d4c7-49ba-adec-f338d0a0c01f_ecg.lpcm"
     with open(lpcm_zst_file_path, 'rb') as f:
-        decompress_zstandard_stream_to_file(f)
+        decompress_zstandard_stream_to_file(f, output_file_path)
 
     assert output_file_path.is_file()
     decompressed_data = np.copy(np.memmap(str(output_file_path)))
@@ -116,11 +117,12 @@ def test_decompress_zstandard_stream_to_file(tmpdir, lpcm_zst_file_path):
     shutil.rmtree(tmpdir)
 
 
-def test_decompress_zstandard_stream_to_stream():
+def test_decompress_zstandard_stream_to_stream(lpcm_zst_file_path):
     with open(lpcm_zst_file_path, 'rb') as f:
         file_buf = decompress_zstandard_stream_to_stream(f)
-    decompressed_data = np.ndarray(buffer = file_buf.getbuffer(), dtype = np.int16, shape = (19, 30720), order='F')
-    reference_data = np.copy(np.memmap(lpcm_zst_file_path.replace('.zst', '')))
+    decompressed_data = np.ndarray(buffer = file_buf.getbuffer(), dtype = np.int16, shape = (2, 77490), order='F')
+
+    reference_data = np.copy(np.memmap(lpcm_zst_file_path.replace('.zst', ''), dtype = np.int16, shape = (2, 77490), order='F'))
     assert np.array_equal(decompressed_data, reference_data)
 
 
