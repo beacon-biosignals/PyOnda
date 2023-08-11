@@ -5,7 +5,7 @@ from pyonda.utils import download_s3_fileobj, arrow_to_processed_pandas, decompr
 
 
 def load_arrow_table(path_to_table, processed_pandas=True):
-    """Load arrow table into pyarrow table or pandas dataframe with an optional processing step
+    """Load arrow table into pyarrow table or pandas dataframe with a processing step
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def load_arrow_table(path_to_table, processed_pandas=True):
 
 
 def load_arrow_table_from_s3(table_url,  processed_pandas=True):
-    """Load arrow table from S3 into pandas dataframe with an optional processing step
+    """Load arrow table from S3 into pyarrow table or pandas dataframe with a processing step
 
     Parameters
     ----------
