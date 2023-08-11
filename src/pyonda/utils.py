@@ -92,7 +92,7 @@ def download_s3_fileobj(s3_url):
     return buf
 
 
-def decompress_zstandard_to_folder(input_file, destination_dir):
+def decompress_zstandard_file_to_folder(input_file, destination_dir):
     """Decompress .zst archive to file
     From https://stackoverflow.com/questions/55184290/how-to-decompress-lzma2-xz-and-zstd-zst-files-into-a-folder-using-python-3
 
@@ -109,6 +109,38 @@ def decompress_zstandard_to_folder(input_file, destination_dir):
         output_path = Path(destination_dir) / input_file.stem
         with open(output_path, 'wb') as destination:
             decomp.copy_stream(compressed, destination)
+
+
+def decompress_zstandard_file_to_stream(input_file):
+    """Decompress .zst archive to stream
+    From https://stackoverflow.com/questions/55184290/how-to-decompress-lzma2-xz-and-zstd-zst-files-into-a-folder-using-python-3
+
+    Parameters
+    ----------
+    input_file : str or Path
+        path to .zst compressed file
+    """
+    input_file = Path(input_file)
+    buf = io.BytesIO()
+    with open(input_file, 'rb') as compressed:
+        decomp = zstandard.ZstdDecompressor()
+        decomp.copy_stream(compressed, buf)
+    buf.seek(0)
+    return buf
+
+
+def decompress_zstandard_stream_to_file(input_stream, output_path):
+    decomp = zstandard.ZstdDecompressor()
+    with open(output_path, 'wb') as destination:
+        decomp.copy_stream(input_stream, destination)
+
+
+def decompress_zstandard_stream_to_stream(input_stream):
+    buf = io.BytesIO()
+    decomp = zstandard.ZstdDecompressor()
+    decomp.copy_stream(input_stream, buf)
+    buf.seek(0)
+    return buf
 
 
 def arrow_to_processed_pandas(table):
