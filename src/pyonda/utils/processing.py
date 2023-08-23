@@ -25,6 +25,25 @@ def convert_julia_uuid(value):
 
 
 def check_if_schema_field_has_unsupported_binary_data(field):
+    """Given a pyarrow schema field, check if its type is FixedSizeBinaryType or if it is a StructType
+    check if any children have the FixedSizeBinaryType in a recursive manner. Raise ValueError if we cannot
+    associate the field with 'ARROW:extension:name'-'JuliaLang.UUID' key value pair metadata.
+    This is done to prevent any obscure data conversions because of the endianness difference between python and julia.
+
+    Parameters
+    ----------
+    field : pyarrow.Field
+        schema field
+
+    Raises
+    ------
+    ValueError
+        FixedSizeBinaryType field has no metadata
+    ValueError
+        FixedSizeBinaryType field has metadata but no 'ARROW:extension:name' key
+    ValueError
+        FixedSizeBinaryType field has metadata with a 'ARROW:extension:name' key but not a 'JuliaLang.UUID' value
+    """
     child_fields = field.flatten()
     for field in child_fields:
         if type(field.type) == pa.lib.StructType:
@@ -32,6 +51,8 @@ def check_if_schema_field_has_unsupported_binary_data(field):
         elif type(field.type) == pa.lib.FixedSizeBinaryType:
             if field.metadata is not None:
                 metadata = {k.decode():v.decode() for k,v in field.metadata.items()}
+                if 'ARROW:extension:name' not in metadata.keys():
+                    raise ValueError(f'Unsupported FixedSizeBinaryType value encountered in {field.name} (no type extension, missing ARROW:extension:name key)')
                 type_extension = metadata['ARROW:extension:name']
                 if type_extension != 'JuliaLang.UUID':
                     raise ValueError(f'Unsupported FixedSizeBinaryType value encountered in {field.name} (unknown type extension {type_extension})')

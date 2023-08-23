@@ -41,15 +41,35 @@ def decompress_zstandard_file_to_stream(input_file):
 
 
 def decompress_zstandard_stream_to_file(input_stream, output_path):
+    """Decompress .zst file stream to file
+    From https://stackoverflow.com/questions/55184290/how-to-decompress-lzma2-xz-and-zstd-zst-files-into-a-folder-using-python-3
+
+    Parameters
+    ----------
+    input_stream: io.BytesIO
+        input stream of a .zst archive
+    output_path : str or Path
+        path to decompressed output file
+    """
     decomp = zstandard.ZstdDecompressor()
     with open(output_path, 'wb') as destination:
         decomp.copy_stream(input_stream, destination)
 
 
 def decompress_zstandard_stream_to_stream(input_stream):
-    buf = io.BytesIO()
+    """Decompress .zst file stream to file
+    From https://stackoverflow.com/questions/55184290/how-to-decompress-lzma2-xz-and-zstd-zst-files-into-a-folder-using-python-3
+
+    Parameters
+    ----------
+    input_stream: io.BytesIO
+        input stream of a .zst archive
+    output_stream: io.BytesIO
+        output stream of the decompressed lpcm file
+    """
+    output_stream = io.BytesIO()
     decomp = zstandard.ZstdDecompressor()
-    decomp.copy_stream(input_stream, buf)
-    buf.seek(0)
-    return buf
+    decomp.copy_stream(input_stream, output_stream)
+    output_stream.seek(0)
+    return output_stream
 
