@@ -14,3 +14,8 @@ pip install hatch
 # With hatch, create environments
 hatch env create
 ```
+
+Before using s3 related functions make sur to setup the correct AWS_PROFILE
+```shell
+export AWS_PROFILE=relevant_profile
+```

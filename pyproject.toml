@@ -15,6 +15,7 @@ authors = [
 dependencies = [
   "boto3==1.28.19",
   "pyarrow==12.0.1",
+  "pandas==2.0.3",
   "numpy==1.24.4",
   "zstandard==0.21.0"
 ]
@@ -23,6 +24,7 @@ dependencies = [
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "moto==4.1.15"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
