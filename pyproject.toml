@@ -24,6 +24,7 @@ dependencies = [
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "moto==4.1.15"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
