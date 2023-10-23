@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pytest
-from pyonda.utils.schemas import get_onda_annotations_schema, timespan_namedtuple
+from pyonda.utils.schemas import ONDA_ANNOTATIONS_SCHEMA, timespan_namedtuple
 
 
 def test_timespan_namedtuple():
@@ -27,20 +27,19 @@ def test_timespan_namedtuple_bad_types():
 
 
 def test_get_onda_annotations_schema():
-    schema = get_onda_annotations_schema()
-    assert schema.names == ['recording', 'id', 'span']
+    assert ONDA_ANNOTATIONS_SCHEMA.names == ['recording', 'id', 'span']
 
-    recording_field = get_onda_annotations_schema().field('recording')
+    recording_field = ONDA_ANNOTATIONS_SCHEMA.field('recording')
     assert recording_field.type.equals(pa.binary(16))
     assert not recording_field.nullable
     assert recording_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
 
-    id_field = get_onda_annotations_schema().field('recording')
+    id_field = ONDA_ANNOTATIONS_SCHEMA.field('recording')
     assert id_field.type.equals(pa.binary(16))
     assert not id_field.nullable
     assert id_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
     
-    span_field = get_onda_annotations_schema().field('span')
+    span_field = ONDA_ANNOTATIONS_SCHEMA.field('span')
     assert span_field.type.equals(pa.struct([('start', pa.int64()), ('stop', pa.int64())]))
     assert not span_field.nullable
     assert span_field.metadata == {b"ARROW:extension:name": b"JuliaLang.TimeSpan"}

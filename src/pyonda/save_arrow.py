@@ -5,17 +5,17 @@ from pyonda.utils.s3_upload import upload_file_to_s3
 from pathlib import Path
 
 
-def save_table_to_arrow_file(output_path, table, schema):
+def save_table_to_arrow_file(table, schema, output_path):
     """Sable pyarrow Table to output_path
 
     Parameters
     ----------
-    output_path : str or Path
-        output file path
     table : pyarrow.lib.Table
         table to save
     schema : pyarrow.lib.Schema
         schema of the table to save
+    output_path : str or Path
+        output file path
     """
     with pa.OSFile(str(output_path), 'wb') as sink:
         with pa.ipc.new_file(sink, schema=schema) as writer:
@@ -43,7 +43,7 @@ def save_table_to_s3(table, schema, bucket, key):
     """
     temp_dir = tempfile.TemporaryDirectory() 
     temp_file_path = Path(temp_dir.name) / "table_to_upload.arrow"
-    save_table_to_arrow_file(temp_file_path, table, schema)
+    save_table_to_arrow_file(table, schema, temp_file_path)
     upload_status = upload_file_to_s3(temp_file_path, bucket, key)
     temp_dir.cleanup()
     return upload_status
