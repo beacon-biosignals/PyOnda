@@ -4,8 +4,10 @@ from pyonda.utils.schemas import get_onda_annotations_schema, timespan_namedtupl
 
 
 def test_timespan_namedtuple():
-    TimeSpan = timespan_namedtuple(start = 10*1e9, stop = 20*1e9)
+    TimeSpan = timespan_namedtuple(start = int(10*1e9), stop = int(20*1e9))
     assert TimeSpan._fields == ('start', 'stop')
+    assert TimeSpan.start == 10*1e9
+    assert TimeSpan.stop == 20*1e9
 
 
 def test_timespan_namedtuple_stop_smaller_than_start():

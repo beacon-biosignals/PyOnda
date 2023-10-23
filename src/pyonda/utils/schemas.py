@@ -28,11 +28,11 @@ def timespan_namedtuple(start, stop):
     >>> ts.start
     1000000000.0
     """
-    if stop <= start:
-        raise ValueError('start should be < stop')
-
     if not isinstance(stop, int) or not isinstance(start, int):
         raise ValueError('start and stop should be integers (nanosecond values)')
+
+    if stop <= start:
+        raise ValueError('start should be < stop')
 
     if start != 0 and start < 1e9:
         warnings.warn('You have 0 < start < 1s, check that you put the value in nanoseconds')
