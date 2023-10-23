@@ -54,14 +54,14 @@ def get_onda_annotations_schema():
     Examples
     --------
     >>> from pyonda.utils.schemas import get_onda_annotations_schema, timespan_namedtuple
-    >>> from pyonda.utils.processing import convert_python_uuid
+    >>> from pyonda.utils.processing import convert_python_uuid_to_uuid_bytestring
     >>> import pyarrow as pa
     >>> import uuid
     >>> schema = get_onda_annotations_schema()
-    >>> record_uuid = convert_python_uuid(uuid.uuid4())
+    >>> record_uuid = convert_python_uuid_to_uuid_bytestring(uuid.uuid4())
     >>> rows = (
     >>>    [record_uuid] * 3, 
-    >>>    [convert_python_uuid(uuid.uuid4()) for i in range(3)], 
+    >>>    [convert_python_uuid_to_uuid_bytestring(uuid.uuid4()) for i in range(3)], 
     >>>    [timespan_namedtuple(start=int(n*30*(1e9)), stop=int((n+1)*30*(1e9))) for n in range(3)]
     >>> )
     >>> table = pa.Table.from_pydict(dict(zip(schema.names, rows)), schema=schema)
