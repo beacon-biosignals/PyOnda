@@ -29,6 +29,18 @@ def test_timespan_namedtuple_bad_types():
 def test_get_onda_annotations_schema():
     schema = get_onda_annotations_schema()
     assert schema.names == ['recording', 'id', 'span']
-    assert get_onda_annotations_schema().field('recording').type.equals(pa.binary(16))
-    assert get_onda_annotations_schema().field('id').type.equals(pa.binary(16))
-    assert get_onda_annotations_schema().field('span').type.equals(pa.struct([('start', pa.int64()), ('stop', pa.int64())]))
+
+    recording_field = get_onda_annotations_schema().field('recording')
+    assert recording_field.type.equals(pa.binary(16))
+    assert not recording_field.nullable
+    assert recording_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
+
+    id_field = get_onda_annotations_schema().field('recording')
+    assert id_field.type.equals(pa.binary(16))
+    assert not id_field.nullable
+    assert id_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
+    
+    span_field = get_onda_annotations_schema().field('span')
+    assert span_field.type.equals(pa.struct([('start', pa.int64()), ('stop', pa.int64())]))
+    assert not span_field.nullable
+    assert span_field.metadata == {b"ARROW:extension:name": b"JuliaLang.TimeSpan"}

@@ -69,10 +69,13 @@ def get_onda_annotations_schema():
     return pa.schema(
         [
             pa.field('recording', pa.binary(16), 
+                     nullable=False,
                      metadata={"ARROW:extension:name": "JuliaLang.UUID"}),
             pa.field('id', pa.binary(16), 
+                     nullable=False,
                      metadata={"ARROW:extension:name": "JuliaLang.UUID"}),
             pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+                     nullable=False,
                      metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}),
         ]
     )
