@@ -2,20 +2,20 @@ import pytest
 import pyarrow as pa
 from pyonda.utils.processing import (
     arrow_to_processed_pandas, 
-    convert_julia_uuid,
-    convert_python_uuid,
+    convert_julia_uuid_bytestring_to_uuid,
+    convert_python_uuid_to_uuid_bytestring,
     check_if_schema_field_has_unsupported_binary_data
 )
 from tests.fixtures import signal_arrow_table_path, assert_signal_arrow_dataframes_equal
 
 
 def test_convert_julia_uuid():
-    assert convert_julia_uuid(None) is None, "None input should return a None output"
+    assert convert_julia_uuid_bytestring_to_uuid(None) is None, "None input should return a None output"
     # TODO how to test this
 
 
 def test_convert_python_uuid():
-    assert convert_python_uuid(None) is None, "None input should return a None output"
+    assert convert_python_uuid_to_uuid_bytestring(None) is None, "None input should return a None output"
     # TODO how to test this
 
     
