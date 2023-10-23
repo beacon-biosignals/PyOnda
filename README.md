@@ -1,5 +1,5 @@
 # PyOnda
-Python tools to handle Onda formatted data
+Python tools to handle [Onda](https://github.com/beacon-biosignals/Onda.jl/tree/main) formatted data
 
 ## Setup
 The packaging uses hatch.
