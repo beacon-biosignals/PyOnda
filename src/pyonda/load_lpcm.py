@@ -70,7 +70,6 @@ def load_array_from_lpcm_file_in_s3(file_url, dtype, n_channels, order="F"):
     order : str
         C or F, use F to read files from Julia, use C to save files for Julia
 
-
     Returns
     -------
     data: ndarray
@@ -80,7 +79,7 @@ def load_array_from_lpcm_file_in_s3(file_url, dtype, n_channels, order="F"):
     return load_array_from_lpcm_file_buffer(file_buf, dtype, n_channels, order)
 
 
-def load_array_from_lpcm_zst_file(path_to_file, dtype, n_channels):
+def load_array_from_lpcm_zst_file(path_to_file, dtype, n_channels, order="F"):
     """Decompress lpcm zst and load file content as a numpy array with correct data type and shape
 
     Parameters
@@ -91,6 +90,8 @@ def load_array_from_lpcm_zst_file(path_to_file, dtype, n_channels):
         data sample type (passed to dtype argument in numpy)
     n_channels : int
         number of channels used to reshape data
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
 
     Returns
     -------
@@ -98,10 +99,10 @@ def load_array_from_lpcm_zst_file(path_to_file, dtype, n_channels):
         numpy array with lpcm file content 
     """
     file_buf = decompress_zstandard_file_to_stream(path_to_file)
-    return load_array_from_lpcm_file_buffer(file_buf, dtype, n_channels)
+    return load_array_from_lpcm_file_buffer(file_buf, dtype, n_channels, order)
 
 
-def load_array_from_lpcm_zst_file_in_s3(file_url, dtype, n_channels):
+def load_array_from_lpcm_zst_file_in_s3(file_url, dtype, n_channels, order="F"):
     """Decompress lpcm zst from s3 and load file content as a numpy array with correct data type and shape
 
     Parameters
@@ -112,6 +113,8 @@ def load_array_from_lpcm_zst_file_in_s3(file_url, dtype, n_channels):
         data sample type (passed to dtype argument in numpy)
     n_channels : int
         number of channels used to reshape data
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
 
     Returns
     -------
@@ -120,4 +123,4 @@ def load_array_from_lpcm_zst_file_in_s3(file_url, dtype, n_channels):
     """
     file_buf = download_s3_fileobj(file_url)
     file_buf = decompress_zstandard_stream_to_stream(file_buf)
-    return load_array_from_lpcm_file_buffer(file_buf, dtype, n_channels)
+    return load_array_from_lpcm_file_buffer(file_buf, dtype, n_channels, order)
