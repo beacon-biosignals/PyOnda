@@ -43,7 +43,8 @@ def save_table_to_s3(table, schema, bucket, key):
     """
     temp_dir = tempfile.TemporaryDirectory() 
     temp_file_path = Path(temp_dir.name) / "table_to_upload.arrow"
-    save_table_to_arrow_file(table, schema, temp_file_path)
-    upload_status = upload_file_to_s3(temp_file_path, bucket, key)
-    temp_dir.cleanup()
-    return upload_status
+    try:
+        save_table_to_arrow_file(table, schema, temp_file_path)
+        upload_file_to_s3(temp_file_path, bucket, key)
+    finally:
+        temp_dir.cleanup()

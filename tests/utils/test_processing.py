@@ -6,7 +6,8 @@ from pyonda.utils.processing import (
     convert_python_uuid_to_uuid_bytestring,
     check_if_schema_field_has_unsupported_binary_data
 )
-from tests.fixtures import signal_arrow_table_path, assert_signal_arrow_dataframes_equal
+from tests.utils import assert_signal_arrow_dataframes_equal
+from tests.fixtures import signal_arrow_table_path
 
 
 def test_convert_julia_uuid():

@@ -6,24 +6,30 @@ from pyonda.utils.schemas import ONDA_ANNOTATIONS_SCHEMA, timespan_namedtuple
 def test_timespan_namedtuple():
     TimeSpan = timespan_namedtuple(start = int(10*1e9), stop = int(20*1e9))
     assert TimeSpan._fields == ('start', 'stop')
-    assert TimeSpan.start == 10*1e9
-    assert TimeSpan.stop == 20*1e9
+    assert TimeSpan.start == int(10*1e9)
+    assert TimeSpan.stop == int(20*1e9)
 
 
 def test_timespan_namedtuple_stop_smaller_than_start():
     with pytest.raises(ValueError):
-        timespan_namedtuple(start = 20*1e9, stop = 10*1e9)
+        timespan_namedtuple(start = int(20*1e9), stop = int(10*1e9))
 
 
 def test_timespan_namedtuple_bad_types():
     with pytest.raises(ValueError):
-        timespan_namedtuple(start = "nope", stop = 10*1e9)
+        timespan_namedtuple(start = "nope", stop = int(10*1e9))
 
     with pytest.raises(ValueError):
-        timespan_namedtuple(start = 20*1e9, stop = "nope")
+        timespan_namedtuple(start = int(20*1e9), stop = "nope")
 
     with pytest.raises(ValueError):
         timespan_namedtuple(start = "nope", stop = "nope")
+
+    with pytest.raises(ValueError):
+        timespan_namedtuple(start = 10*1e9, stop = int(30*1e9))
+
+    with pytest.raises(ValueError):
+        timespan_namedtuple(start = int(10*1e9), stop = 30*1e9)
 
 
 def test_get_onda_annotations_schema():

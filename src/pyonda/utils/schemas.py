@@ -45,23 +45,68 @@ def timespan_namedtuple(start, stop):
 # cf. examples/generate_data.py
 ONDA_ANNOTATIONS_SCHEMA = pa.schema(
     [
-        pa.field(
-            'recording', 
-            pa.binary(16), 
+        pa.field('recording', pa.binary(16), 
             nullable=False, 
             metadata={"ARROW:extension:name": "JuliaLang.UUID"}
         ),
-        pa.field(
-            'id', 
-            pa.binary(16), 
+        pa.field('id', pa.binary(16), 
             nullable=False,
             metadata={"ARROW:extension:name": "JuliaLang.UUID"}
         ),
-        pa.field(
-            'span',
-            pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
             nullable=False,
             metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
         ),
+    ],
+    metadata = {
+        "legolas_schema_qualified" : "clean-sleep.signal@1>datastore.signal@1>onda.signal@2>onda.samples-info@2"
+    }
+)
+
+# https://github.com/beacon-biosignals/Onda.jl/blob/main/src/signals.jl
+ONDA_SIGNALS_SCHEMA = pa.schema(
+    [
+        pa.field('recording', pa.binary(16), 
+            nullable=False, 
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('id', pa.binary(16), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('file_path', pa.string(), 
+            nullable=False
+        ),
+        pa.field('file_format', pa.string(), 
+            nullable=False
+        ),
+        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
+        ),
+        pa.field('sensor_type', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sensor_label', pa.string(), 
+            nullable=False
+        ),
+        pa.field('channels', pa.list_(pa.string()), 
+            nullable=False
+        ),
+        pa.field('sample_unit', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sample_resolution_in_unit', pa.float64(), 
+            nullable=False
+        ),
+        pa.field('sample_offset_in_unit', pa.float64(), 
+            nullable=False
+        ),
+        pa.field('sample_type', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sample_rate', pa.float64(), 
+            nullable=False
+        )       
     ]
 )
