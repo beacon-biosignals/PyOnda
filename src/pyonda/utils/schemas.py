@@ -57,10 +57,7 @@ ONDA_ANNOTATIONS_SCHEMA = pa.schema(
             nullable=False,
             metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
         ),
-    ],
-    metadata = {
-        "legolas_schema_qualified" : "clean-sleep.signal@1>datastore.signal@1>onda.signal@2>onda.samples-info@2"
-    }
+    ]
 )
 
 # https://github.com/beacon-biosignals/Onda.jl/blob/main/src/signals.jl

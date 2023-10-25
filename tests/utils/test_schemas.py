@@ -1,6 +1,6 @@
 import pyarrow as pa
 import pytest
-from pyonda.utils.schemas import ONDA_ANNOTATIONS_SCHEMA, timespan_namedtuple
+from pyonda.utils.schemas import ONDA_ANNOTATIONS_SCHEMA, ONDA_SIGNALS_SCHEMA, timespan_namedtuple
 
 
 def test_timespan_namedtuple():
@@ -32,20 +32,69 @@ def test_timespan_namedtuple_bad_types():
         timespan_namedtuple(start = int(10*1e9), stop = 30*1e9)
 
 
-def test_get_onda_annotations_schema():
-    assert ONDA_ANNOTATIONS_SCHEMA.names == ['recording', 'id', 'span']
+def test_onda_annotations_schema():
+    assert ONDA_ANNOTATIONS_SCHEMA == pa.schema(
+    [
+        pa.field('recording', pa.binary(16), 
+            nullable=False, 
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('id', pa.binary(16), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
+        ),
+    ]
+)
 
-    recording_field = ONDA_ANNOTATIONS_SCHEMA.field('recording')
-    assert recording_field.type.equals(pa.binary(16))
-    assert not recording_field.nullable
-    assert recording_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
 
-    id_field = ONDA_ANNOTATIONS_SCHEMA.field('recording')
-    assert id_field.type.equals(pa.binary(16))
-    assert not id_field.nullable
-    assert id_field.metadata == {b"ARROW:extension:name": b"JuliaLang.UUID"}
-    
-    span_field = ONDA_ANNOTATIONS_SCHEMA.field('span')
-    assert span_field.type.equals(pa.struct([('start', pa.int64()), ('stop', pa.int64())]))
-    assert not span_field.nullable
-    assert span_field.metadata == {b"ARROW:extension:name": b"JuliaLang.TimeSpan"}
+def test_onda_signals_schema():
+    assert ONDA_SIGNALS_SCHEMA == pa.schema(
+    [
+        pa.field('recording', pa.binary(16), 
+            nullable=False, 
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('id', pa.binary(16), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+        ),
+        pa.field('file_path', pa.string(), 
+            nullable=False
+        ),
+        pa.field('file_format', pa.string(), 
+            nullable=False
+        ),
+        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
+        ),
+        pa.field('sensor_type', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sensor_label', pa.string(), 
+            nullable=False
+        ),
+        pa.field('channels', pa.list_(pa.string()), 
+            nullable=False
+        ),
+        pa.field('sample_unit', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sample_resolution_in_unit', pa.float64(), 
+            nullable=False
+        ),
+        pa.field('sample_offset_in_unit', pa.float64(), 
+            nullable=False
+        ),
+        pa.field('sample_type', pa.string(), 
+            nullable=False
+        ),
+        pa.field('sample_rate', pa.float64(), 
+            nullable=False
+        )       
+    ]
+)
