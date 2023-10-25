@@ -2,7 +2,7 @@ import uuid
 import pyarrow as pa
 
 
-def convert_julia_uuid(value):
+def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring):
     """decode the UUID fields which are by default loaded as bytestrings by pandas. Due to endianness difference
     we need to reverse the bytearray before decoding the UUID to obtain the same hex string
 
@@ -16,12 +16,34 @@ def convert_julia_uuid(value):
     uuid_obj: uuid.UUID
         UUID object (hex representation)
     """
-    if value is None:
+    if uuid_bytestring is None:
         return None
-    x = bytearray(value)
+    x = bytearray(uuid_bytestring)
     x.reverse()
     uuid_obj = uuid.UUID(bytes=bytes(x), version=4)
     return uuid_obj
+
+
+def convert_python_uuid_to_uuid_bytestring(uuid_instance):
+    """Convert python uuid object to a bytestring with bytes reversed. This will allow Julia to interpret the bytes as 
+    the correct UUID (endianness difference, cf. convert_julia_uuid)
+
+    Parameters
+    ----------
+    value : uuid.UUID
+        python uuid object
+
+    Returns
+    -------
+    uuid_bytes: bytestring
+        to be interpreted by julia
+    """
+    if uuid_instance is None:
+        return None
+    x = bytearray(uuid_instance.bytes)
+    x.reverse()
+    uuid_bytes = bytes(x)
+    return uuid_bytes
 
 
 def check_if_schema_field_has_unsupported_binary_data(field):
@@ -96,6 +118,6 @@ def arrow_to_processed_pandas(table):
         # Convert JuliaLang.UUIDs with byte reversal
         metadata = {k.decode():v.decode() for k,v in field.metadata.items()}
         if 'ARROW:extension:name' in metadata.keys() and metadata['ARROW:extension:name'] == 'JuliaLang.UUID':
-            dataframe[schema_field] = dataframe[schema_field].map(convert_julia_uuid)
+            dataframe[schema_field] = dataframe[schema_field].map(convert_julia_uuid_bytestring_to_uuid)
         
     return dataframe
