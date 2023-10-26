@@ -1,9 +1,9 @@
 import numpy as np
 import tempfile
-import os
 from pathlib import Path
 from pyonda.utils.s3_upload import upload_file_to_s3
 from pyonda.utils.compression import compress_file_to_zst
+from botocore.client import BaseClient
 
 
 def save_array_to_lpcm_file(array, output_path):
@@ -54,7 +54,7 @@ def save_array_to_lpcm_zst_file(array, output_path):
         temp_dir.cleanup()
 
 
-def save_array_to_lpcm_file_in_s3(array, bucket, key):
+def save_array_to_lpcm_file_in_s3(array, bucket, key, client:BaseClient=None):
     """Save a numpy array in a temp dir as a .lpcm and upload it to s3
 
     Parameters
@@ -65,6 +65,8 @@ def save_array_to_lpcm_file_in_s3(array, bucket, key):
         destination bucket name
     key : str
         destination file key
+    client: BaseClient, default=None
+        boto3 client instance
 
     Returns
     -------
@@ -75,12 +77,12 @@ def save_array_to_lpcm_file_in_s3(array, bucket, key):
     temp_file_path = Path(temp_dir.name) / "array_to_upload.lpcm"
     try:
         save_array_to_lpcm_file(array, temp_file_path)
-        upload_status = upload_file_to_s3(temp_file_path, bucket, key)
+        upload_file_to_s3(temp_file_path, bucket, key, client)
     finally:
         temp_dir.cleanup()
 
 
-def save_array_to_lpcm_zst_file_in_s3(array, bucket, key):
+def save_array_to_lpcm_zst_file_in_s3(array, bucket, key, client:BaseClient=None):
     """Save a numpy array in a temp dir as a .lpcm and upload it to s3
 
     Parameters
@@ -93,6 +95,8 @@ def save_array_to_lpcm_zst_file_in_s3(array, bucket, key):
         destination file key
     compress : bool, default=False
         if true, compress file to .zst 
+    client: BaseClient, default=None
+        boto3 client instance
 
     Returns
     -------
@@ -106,6 +110,6 @@ def save_array_to_lpcm_zst_file_in_s3(array, bucket, key):
         compress_file_to_zst(temp_file_path, Path(temp_dir.name))
 
         compressed_file_path = Path(temp_dir.name) / 'array_to_upload.lpcm.zst'
-        upload_file_to_s3(compressed_file_path, bucket, key)
+        upload_file_to_s3(compressed_file_path, bucket, key, client)
     finally:
         temp_dir.cleanup()
