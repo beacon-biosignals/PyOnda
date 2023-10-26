@@ -3,6 +3,7 @@ import tempfile
 
 from pyonda.utils.s3_upload import upload_file_to_s3
 from pathlib import Path
+from botocore.client import BaseClient
 
 
 def save_table_to_arrow_file(table, schema, output_path):
@@ -22,7 +23,7 @@ def save_table_to_arrow_file(table, schema, output_path):
             writer.write(table)
 
 
-def save_table_to_s3(table, schema, bucket, key):
+def save_table_to_s3(table, schema, bucket, key, client:BaseClient=None):
     """Save table in a temp dir and upload it to s3
 
     Parameters
@@ -35,6 +36,8 @@ def save_table_to_s3(table, schema, bucket, key):
         destination bucket name
     key : str
         destination file key
+    client: BaseClient, default=None
+        boto3 client instance
 
     Returns
     -------
@@ -45,6 +48,6 @@ def save_table_to_s3(table, schema, bucket, key):
     temp_file_path = Path(temp_dir.name) / "table_to_upload.arrow"
     try:
         save_table_to_arrow_file(table, schema, temp_file_path)
-        upload_file_to_s3(temp_file_path, bucket, key)
+        upload_file_to_s3(temp_file_path, bucket, key, client)
     finally:
         temp_dir.cleanup()

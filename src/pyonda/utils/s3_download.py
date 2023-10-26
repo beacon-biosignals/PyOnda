@@ -1,5 +1,6 @@
 import io
 import boto3
+from botocore.client import BaseClient
 
 
 def path_is_an_s3_url(path):
@@ -44,7 +45,7 @@ def parse_s3_url(s3_url):
     return bucket, key, version
 
 
-def download_s3_file(s3_url, output_file_path):
+def download_s3_file(s3_url, output_file_path, client:BaseClient=None):
     """Given an object URL in S3, download an object from S3 to a file
     See: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/download_file.html
 
@@ -54,8 +55,11 @@ def download_s3_file(s3_url, output_file_path):
         input S3 URL string 
     output_file_path : str or Path
         new path on local storage for downloaded object
+    client: BaseClient, default=None
+        boto3 client instance
     """
-    client = boto3.client("s3")
+    if client is None:
+        client = boto3.client("s3")
     bucket, key, version = parse_s3_url(s3_url)
     if version is not None:
         client.download_file(bucket, key, output_file_path, ExtraArgs={"VersionId": version})
@@ -63,7 +67,7 @@ def download_s3_file(s3_url, output_file_path):
         client.download_file(bucket, key, output_file_path)
 
 
-def download_s3_fileobj(s3_url):
+def download_s3_fileobj(s3_url, client:BaseClient=None):
     """Given an object URL in S3, download an object from S3 to a binary stream
     See: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/download_fileobj.html
 
@@ -71,13 +75,16 @@ def download_s3_fileobj(s3_url):
     ----------
     s3_url : str or Path
         input S3 URL string
+    client: BaseClient, default=None
+        boto3 client instance
 
     Returns
     -------
     buf: BytesIO
         binary stream holding the downloaded object
     """
-    client = boto3.client("s3")
+    if client is None:
+        client = boto3.client("s3")
     bucket, key, version = parse_s3_url(s3_url)
     buf = io.BytesIO()
     if version is not None:
