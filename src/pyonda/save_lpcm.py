@@ -6,7 +6,7 @@ from pyonda.utils.compression import compress_file_to_zst
 from botocore.client import BaseClient
 
 
-def save_array_to_lpcm_file(array, output_path):
+def save_array_to_lpcm_file(array, output_path, order='C'):
     """Save numpy array to .lpcm binary file
 
     Parameters
@@ -15,6 +15,8 @@ def save_array_to_lpcm_file(array, output_path):
         input numpy array to be saved
     output_path : str or Path
         output file path
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
     """
     output_path = str(output_path)
     if output_path[-5:]!=".lpcm":
@@ -25,12 +27,12 @@ def save_array_to_lpcm_file(array, output_path):
         dtype=array.dtype, 
         mode='w+', 
         shape=array.shape, 
-        order='C'
+        order=order
     )
     holder[:] = array
 
 
-def save_array_to_lpcm_zst_file(array, output_path):
+def save_array_to_lpcm_zst_file(array, output_path, order='C'):
     """Save numpy array to .lpcm.zst compressed binary file
 
     Parameters
@@ -39,6 +41,8 @@ def save_array_to_lpcm_zst_file(array, output_path):
         input numpy array to be saved
     output_path : str or Path
         output file path
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
     """
     if str(output_path)[-9:]!=".lpcm.zst":
         raise ValueError(f"output path should have .lpcm.zst extension (you have {str(output_path)[:-9]})")
@@ -48,13 +52,13 @@ def save_array_to_lpcm_zst_file(array, output_path):
 
     lpcm_path = Path(temp_dir.name, output_path.stem)
     try:
-        save_array_to_lpcm_file(array, lpcm_path)
+        save_array_to_lpcm_file(array, lpcm_path, order)
         compress_file_to_zst(lpcm_path, output_path.parent)
     finally:
         temp_dir.cleanup()
 
 
-def save_array_to_lpcm_file_in_s3(array, bucket, key, client:BaseClient=None):
+def save_array_to_lpcm_file_in_s3(array, bucket, key, client:BaseClient=None, order='C'):
     """Save a numpy array in a temp dir as a .lpcm and upload it to s3
 
     Parameters
@@ -67,6 +71,8 @@ def save_array_to_lpcm_file_in_s3(array, bucket, key, client:BaseClient=None):
         destination file key
     client: BaseClient, default=None
         boto3 client instance
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
 
     Returns
     -------
@@ -76,13 +82,13 @@ def save_array_to_lpcm_file_in_s3(array, bucket, key, client:BaseClient=None):
     temp_dir = tempfile.TemporaryDirectory() 
     temp_file_path = Path(temp_dir.name) / "array_to_upload.lpcm"
     try:
-        save_array_to_lpcm_file(array, temp_file_path)
+        save_array_to_lpcm_file(array, temp_file_path, order)
         upload_file_to_s3(temp_file_path, bucket, key, client)
     finally:
         temp_dir.cleanup()
 
 
-def save_array_to_lpcm_zst_file_in_s3(array, bucket, key, client:BaseClient=None):
+def save_array_to_lpcm_zst_file_in_s3(array, bucket, key, client:BaseClient=None, order='C'):
     """Save a numpy array in a temp dir as a .lpcm and upload it to s3
 
     Parameters
@@ -97,6 +103,8 @@ def save_array_to_lpcm_zst_file_in_s3(array, bucket, key, client:BaseClient=None
         if true, compress file to .zst 
     client: BaseClient, default=None
         boto3 client instance
+    order : str
+        C or F, use F to read files from Julia, use C to save files for Julia
 
     Returns
     -------
@@ -106,7 +114,7 @@ def save_array_to_lpcm_zst_file_in_s3(array, bucket, key, client:BaseClient=None
     temp_dir = tempfile.TemporaryDirectory() 
     temp_file_path = Path(temp_dir.name) / "array_to_upload.lpcm"
     try:
-        save_array_to_lpcm_file(array, temp_file_path)
+        save_array_to_lpcm_file(array, temp_file_path, order)
         compress_file_to_zst(temp_file_path, Path(temp_dir.name))
 
         compressed_file_path = Path(temp_dir.name) / 'array_to_upload.lpcm.zst'
