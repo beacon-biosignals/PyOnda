@@ -104,13 +104,11 @@ def arrow_to_processed_pandas(table):
 
     for schema_field in table_schema.names:
         field = table_schema.field(schema_field)
-        has_none = any(x is None for x in dataframe[schema_field])
 
         # For a all columns where the value is the list, pass the type to pandas
         # When dataframe is loaded from storage, the field should be mapped with ast.literal_eval to get back the list
         if type(field.type) == pa.ListType:
-            if not has_none:
-                dataframe[schema_field] = dataframe[schema_field].map(list)
+            dataframe[schema_field] = dataframe[schema_field].map(lambda x: x if x is None else list(x))
 
         check_if_schema_field_has_unsupported_binary_data(field)
 
