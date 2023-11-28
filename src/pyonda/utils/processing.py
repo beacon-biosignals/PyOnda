@@ -25,7 +25,7 @@ def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring):
 
 
 def convert_python_uuid_to_uuid_bytestring(uuid_instance):
-    """Convert python uuid object to a bytestring with bytes reversed. This will allow Julia to interpret the bytes as 
+    """Convert python uuid object to a bytestring with bytes reversed. This will allow Julia to interpret the bytes as
     the correct UUID (endianness difference, cf. convert_julia_uuid)
 
     Parameters
@@ -87,7 +87,7 @@ def arrow_to_processed_pandas(table):
     Used for arrow tables generated with Onda.jl to:
     - decode the UUID fields which are by default loaded as bytestrings by pandas. Due to endianness difference
     we need to reverse the bytearray before decoding the UUID to obtain the same hex string
-    - TODO leave timespan as a dict or convert ? 
+    - TODO leave timespan as a dict or convert ?
 
     Parameters
     ----------
@@ -97,7 +97,7 @@ def arrow_to_processed_pandas(table):
     Returns
     -------
     dataframe: pandas.DataFrame
-        arrow table converted to processed pandas dataframe 
+        arrow table converted to processed pandas dataframe
     """
     table_schema = table.schema
     dataframe = table.to_pandas()
@@ -108,16 +108,17 @@ def arrow_to_processed_pandas(table):
         # For a all columns where the value is the list, pass the type to pandas
         # When dataframe is loaded from storage, the field should be mapped with ast.literal_eval to get back the list
         if type(field.type) == pa.ListType:
-            dataframe[schema_field] = dataframe[schema_field].map(list)
+            dataframe[schema_field] = dataframe[schema_field].map(lambda x: x if x is None else list(x))
 
         check_if_schema_field_has_unsupported_binary_data(field)
 
         if field.metadata is None:
             continue
-        
+
         # Convert JuliaLang.UUIDs with byte reversal
         metadata = {k.decode():v.decode() for k,v in field.metadata.items()}
         if 'ARROW:extension:name' in metadata.keys() and metadata['ARROW:extension:name'] == 'JuliaLang.UUID':
             dataframe[schema_field] = dataframe[schema_field].map(convert_julia_uuid_bytestring_to_uuid)
-        
+
     return dataframe
+
