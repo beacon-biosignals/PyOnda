@@ -42,10 +42,14 @@ def load_table_from_arrow_file(path_to_table, processed_pandas=True):
     dataframe: pandas.DataFrame
         table contents loaded into a pandas DataFrame
     """
-    return load_table_from_arrow_file_buffer(pa.memory_map(str(path_to_table), 'r'), processed_pandas)
+    return load_table_from_arrow_file_buffer(
+        pa.memory_map(str(path_to_table), "r"), processed_pandas
+    )
 
 
-def load_table_from_arrow_file_in_s3(table_url,  processed_pandas=True, client:BaseClient=None):
+def load_table_from_arrow_file_in_s3(
+    table_url, processed_pandas=True, client: BaseClient = None
+):
     """Load arrow table from S3 into pyarrow table or pandas dataframe with a processing step
 
     Parameters

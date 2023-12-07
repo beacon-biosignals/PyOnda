@@ -16,7 +16,7 @@ def compress_file_to_zst(input_file, output_dir):
     input_file = Path(input_file)
     output_file = Path(output_dir) / f"{input_file.name}.zst"
 
-    with open(input_file, 'rb') as f:
+    with open(input_file, "rb") as f:
         c = zstandard.ZstdCompressor()
-        with open(output_file, 'wb') as destination:
+        with open(output_file, "wb") as destination:
             c.copy_stream(f, destination)

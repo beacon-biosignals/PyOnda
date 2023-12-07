@@ -29,15 +29,17 @@ def timespan_namedtuple(start, stop):
     1000000000.0
     """
     if not isinstance(stop, int) or not isinstance(start, int):
-        raise ValueError('start and stop should be integers (nanosecond values)')
+        raise ValueError("start and stop should be integers (nanosecond values)")
 
     if stop <= start:
-        raise ValueError('start should be < stop')
+        raise ValueError("start should be < stop")
 
     if start != 0 and start < 1e9:
-        warnings.warn('You have 0 < start < 1s, check that you put the value in nanoseconds')
+        warnings.warn(
+            "You have 0 < start < 1s, check that you put the value in nanoseconds"
+        )
 
-    timespan = namedtuple('TimeSpan', ['start', 'stop'])
+    timespan = namedtuple("TimeSpan", ["start", "stop"])
     return timespan(start=start, stop=stop)
 
 
@@ -45,17 +47,23 @@ def timespan_namedtuple(start, stop):
 # cf. examples/generate_data.py
 ONDA_ANNOTATIONS_SCHEMA = pa.schema(
     [
-        pa.field('recording', pa.binary(16), 
-            nullable=False, 
-            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
-        ),
-        pa.field('id', pa.binary(16), 
+        pa.field(
+            "recording",
+            pa.binary(16),
             nullable=False,
-            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"},
         ),
-        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+        pa.field(
+            "id",
+            pa.binary(16),
             nullable=False,
-            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"},
+        ),
+        pa.field(
+            "span",
+            pa.struct([("start", pa.int64()), ("stop", pa.int64())]),
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"},
         ),
     ]
 )
@@ -63,47 +71,33 @@ ONDA_ANNOTATIONS_SCHEMA = pa.schema(
 # https://github.com/beacon-biosignals/Onda.jl/blob/main/src/signals.jl
 ONDA_SIGNALS_SCHEMA = pa.schema(
     [
-        pa.field('recording', pa.binary(16), 
-            nullable=False, 
-            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
-        ),
-        pa.field('id', pa.binary(16), 
+        pa.field(
+            "recording",
+            pa.binary(16),
             nullable=False,
-            metadata={"ARROW:extension:name": "JuliaLang.UUID"}
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"},
         ),
-        pa.field('file_path', pa.string(), 
-            nullable=False
-        ),
-        pa.field('file_format', pa.string(), 
-            nullable=False
-        ),
-        pa.field('span', pa.struct([('start', pa.int64()), ('stop', pa.int64())]), 
+        pa.field(
+            "id",
+            pa.binary(16),
             nullable=False,
-            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"}
+            metadata={"ARROW:extension:name": "JuliaLang.UUID"},
         ),
-        pa.field('sensor_type', pa.string(), 
-            nullable=False
+        pa.field("file_path", pa.string(), nullable=False),
+        pa.field("file_format", pa.string(), nullable=False),
+        pa.field(
+            "span",
+            pa.struct([("start", pa.int64()), ("stop", pa.int64())]),
+            nullable=False,
+            metadata={"ARROW:extension:name": "JuliaLang.TimeSpan"},
         ),
-        pa.field('sensor_label', pa.string(), 
-            nullable=False
-        ),
-        pa.field('channels', pa.list_(pa.string()), 
-            nullable=False
-        ),
-        pa.field('sample_unit', pa.string(), 
-            nullable=False
-        ),
-        pa.field('sample_resolution_in_unit', pa.float64(), 
-            nullable=False
-        ),
-        pa.field('sample_offset_in_unit', pa.float64(), 
-            nullable=False
-        ),
-        pa.field('sample_type', pa.string(), 
-            nullable=False
-        ),
-        pa.field('sample_rate', pa.float64(), 
-            nullable=False
-        )       
+        pa.field("sensor_type", pa.string(), nullable=False),
+        pa.field("sensor_label", pa.string(), nullable=False),
+        pa.field("channels", pa.list_(pa.string()), nullable=False),
+        pa.field("sample_unit", pa.string(), nullable=False),
+        pa.field("sample_resolution_in_unit", pa.float64(), nullable=False),
+        pa.field("sample_offset_in_unit", pa.float64(), nullable=False),
+        pa.field("sample_type", pa.string(), nullable=False),
+        pa.field("sample_rate", pa.float64(), nullable=False),
     ]
 )

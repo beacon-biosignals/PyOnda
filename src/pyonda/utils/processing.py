@@ -72,14 +72,20 @@ def check_if_schema_field_has_unsupported_binary_data(field):
             check_if_schema_field_has_unsupported_binary_data(field)
         elif type(field.type) == pa.lib.FixedSizeBinaryType:
             if field.metadata is not None:
-                metadata = {k.decode():v.decode() for k,v in field.metadata.items()}
-                if 'ARROW:extension:name' not in metadata.keys():
-                    raise ValueError(f'Unsupported FixedSizeBinaryType value encountered in {field.name} (no type extension, missing ARROW:extension:name key)')
-                type_extension = metadata['ARROW:extension:name']
-                if type_extension != 'JuliaLang.UUID':
-                    raise ValueError(f'Unsupported FixedSizeBinaryType value encountered in {field.name} (unknown type extension {type_extension})')
+                metadata = {k.decode(): v.decode() for k, v in field.metadata.items()}
+                if "ARROW:extension:name" not in metadata.keys():
+                    raise ValueError(
+                        f"Unsupported FixedSizeBinaryType value encountered in {field.name} (no type extension, missing ARROW:extension:name key)"
+                    )
+                type_extension = metadata["ARROW:extension:name"]
+                if type_extension != "JuliaLang.UUID":
+                    raise ValueError(
+                        f"Unsupported FixedSizeBinaryType value encountered in {field.name} (unknown type extension {type_extension})"
+                    )
             else:
-                raise ValueError(f'Unsupported FixedSizeBinaryType value encountered in {field.name} (no metadata)')
+                raise ValueError(
+                    f"Unsupported FixedSizeBinaryType value encountered in {field.name} (no metadata)"
+                )
 
 
 def arrow_to_processed_pandas(table):
@@ -108,7 +114,9 @@ def arrow_to_processed_pandas(table):
         # For a all columns where the value is the list, pass the type to pandas
         # When dataframe is loaded from storage, the field should be mapped with ast.literal_eval to get back the list
         if type(field.type) == pa.ListType:
-            dataframe[schema_field] = dataframe[schema_field].map(lambda x: x if x is None else list(x))
+            dataframe[schema_field] = dataframe[schema_field].map(
+                lambda x: x if x is None else list(x)
+            )
 
         check_if_schema_field_has_unsupported_binary_data(field)
 
@@ -116,9 +124,13 @@ def arrow_to_processed_pandas(table):
             continue
 
         # Convert JuliaLang.UUIDs with byte reversal
-        metadata = {k.decode():v.decode() for k,v in field.metadata.items()}
-        if 'ARROW:extension:name' in metadata.keys() and metadata['ARROW:extension:name'] == 'JuliaLang.UUID':
-            dataframe[schema_field] = dataframe[schema_field].map(convert_julia_uuid_bytestring_to_uuid)
+        metadata = {k.decode(): v.decode() for k, v in field.metadata.items()}
+        if (
+            "ARROW:extension:name" in metadata.keys()
+            and metadata["ARROW:extension:name"] == "JuliaLang.UUID"
+        ):
+            dataframe[schema_field] = dataframe[schema_field].map(
+                convert_julia_uuid_bytestring_to_uuid
+            )
 
     return dataframe
-

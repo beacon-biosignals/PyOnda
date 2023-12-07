@@ -1,8 +1,8 @@
-import boto3 
+import boto3
 from botocore.client import BaseClient
 
 
-def upload_file_to_s3(input_path, bucket, key, client:BaseClient=None):
+def upload_file_to_s3(input_path, bucket, key, client: BaseClient = None):
     """Upload a file to S3
     https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
 

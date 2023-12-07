@@ -18,12 +18,12 @@ def save_table_to_arrow_file(table, schema, output_path):
     output_path : str or Path
         output file path
     """
-    with pa.OSFile(str(output_path), 'wb') as sink:
+    with pa.OSFile(str(output_path), "wb") as sink:
         with pa.ipc.new_file(sink, schema=schema) as writer:
             writer.write(table)
 
 
-def save_table_to_s3(table, schema, bucket, key, client:BaseClient=None):
+def save_table_to_s3(table, schema, bucket, key, client: BaseClient = None):
     """Save table in a temp dir and upload it to s3
 
     Parameters
@@ -44,7 +44,7 @@ def save_table_to_s3(table, schema, bucket, key, client:BaseClient=None):
     upload_status: bool
         False if ClientError is catched during upload
     """
-    temp_dir = tempfile.TemporaryDirectory() 
+    temp_dir = tempfile.TemporaryDirectory()
     temp_file_path = Path(temp_dir.name) / "table_to_upload.arrow"
     try:
         save_table_to_arrow_file(table, schema, temp_file_path)

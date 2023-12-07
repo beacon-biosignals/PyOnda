@@ -1,4 +1,8 @@
-from pyonda.utils.schemas import ONDA_ANNOTATIONS_SCHEMA, ONDA_SIGNALS_SCHEMA, timespan_namedtuple
+from pyonda.utils.schemas import (
+    ONDA_ANNOTATIONS_SCHEMA,
+    ONDA_SIGNALS_SCHEMA,
+    timespan_namedtuple,
+)
 from pyonda.utils.processing import convert_python_uuid_to_uuid_bytestring
 
 from pyonda.save_arrow import save_table_to_arrow_file
@@ -28,17 +32,22 @@ print("Original annotations UUIDs:", original_annot_uuids)
 
 # Reverse bytes for UUIDs
 rows = {
-    'recording': [convert_python_uuid_to_uuid_bytestring(original_record_uuid)] * 3, 
-    'id': [convert_python_uuid_to_uuid_bytestring(x) for x in original_annot_uuids], 
-    'span': [timespan_namedtuple(start=int(n*30*(1e9)), stop=int((n+1)*30*(1e9))) for n in range(3)]
+    "recording": [convert_python_uuid_to_uuid_bytestring(original_record_uuid)] * 3,
+    "id": [convert_python_uuid_to_uuid_bytestring(x) for x in original_annot_uuids],
+    "span": [
+        timespan_namedtuple(start=int(n * 30 * (1e9)), stop=int((n + 1) * 30 * (1e9)))
+        for n in range(3)
+    ],
 }
 table = pa.Table.from_pydict(rows, schema=ONDA_ANNOTATIONS_SCHEMA)
 
-data_folder = Path(__file__).parent.resolve() / 'data'
+data_folder = Path(__file__).parent.resolve() / "data"
 data_folder.mkdir(exist_ok=True)
 print(f"Saving to {data_folder}")
 
-save_table_to_arrow_file(table, ONDA_ANNOTATIONS_SCHEMA, data_folder / "table_test.annotations.arrow")
+save_table_to_arrow_file(
+    table, ONDA_ANNOTATIONS_SCHEMA, data_folder / "table_test.annotations.arrow"
+)
 
 # TODO : load saved table with Julia to check match
 
@@ -52,19 +61,21 @@ save_array_to_lpcm_file(proba_array, data_folder / "array_test.lpcm")
 original_signal_uuid = uuid.uuid4()
 print(str(data_folder / "array_test.lpcm"))
 rows = {
-    'recording': [convert_python_uuid_to_uuid_bytestring(original_record_uuid)], 
-    'id': [convert_python_uuid_to_uuid_bytestring(original_signal_uuid)], 
-    'file_path': [str(data_folder / "array_test.lpcm")],
-    'file_format': ["lpcm"],
-    'span': [timespan_namedtuple(start=0, stop=int(300*(1e9)))],
-    'sensor_type':["segmentation_model"],
-    'sensor_label': ["hypnodensity"],
-    'channels': [["wake", "n1", "n2", "n3", "rem"]],
-    'sample_unit': ["probability"],
-    'sample_resolution_in_unit': [1],
-    'sample_offset_in_unit': [0],
-    'sample_type': ['float32'],
-    'sample_rate': [1/30]
+    "recording": [convert_python_uuid_to_uuid_bytestring(original_record_uuid)],
+    "id": [convert_python_uuid_to_uuid_bytestring(original_signal_uuid)],
+    "file_path": [str(data_folder / "array_test.lpcm")],
+    "file_format": ["lpcm"],
+    "span": [timespan_namedtuple(start=0, stop=int(300 * (1e9)))],
+    "sensor_type": ["segmentation_model"],
+    "sensor_label": ["hypnodensity"],
+    "channels": [["wake", "n1", "n2", "n3", "rem"]],
+    "sample_unit": ["probability"],
+    "sample_resolution_in_unit": [1],
+    "sample_offset_in_unit": [0],
+    "sample_type": ["float32"],
+    "sample_rate": [1 / 30],
 }
 table = pa.Table.from_pydict(rows, schema=ONDA_SIGNALS_SCHEMA)
-save_table_to_arrow_file(table, ONDA_SIGNALS_SCHEMA, data_folder / "table_test.signal.arrow")
+save_table_to_arrow_file(
+    table, ONDA_SIGNALS_SCHEMA, data_folder / "table_test.signal.arrow"
+)

@@ -15,10 +15,10 @@ def decompress_zstandard_file_to_folder(input_file, destination_dir):
         destination directory for the uncompressed file
     """
     input_file = Path(input_file)
-    with open(input_file, 'rb') as compressed:
+    with open(input_file, "rb") as compressed:
         decomp = zstandard.ZstdDecompressor()
         output_path = Path(destination_dir) / input_file.stem
-        with open(output_path, 'wb') as destination:
+        with open(output_path, "wb") as destination:
             decomp.copy_stream(compressed, destination)
 
 
@@ -33,7 +33,7 @@ def decompress_zstandard_file_to_stream(input_file):
     """
     input_file = Path(input_file)
     buf = io.BytesIO()
-    with open(input_file, 'rb') as compressed:
+    with open(input_file, "rb") as compressed:
         decomp = zstandard.ZstdDecompressor()
         decomp.copy_stream(compressed, buf)
     buf.seek(0)
@@ -52,7 +52,7 @@ def decompress_zstandard_stream_to_file(input_stream, output_path):
         path to decompressed output file
     """
     decomp = zstandard.ZstdDecompressor()
-    with open(output_path, 'wb') as destination:
+    with open(output_path, "wb") as destination:
         decomp.copy_stream(input_stream, destination)
 
 
@@ -72,4 +72,3 @@ def decompress_zstandard_stream_to_stream(input_stream):
     decomp.copy_stream(input_stream, output_stream)
     output_stream.seek(0)
     return output_stream
-

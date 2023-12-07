@@ -57,3 +57,9 @@ jobs:
       run: |
         source .venv/bin/activate
         coverage run -m pytest tests/
+    - name: Apply BLACK formatting
+      run: black .
+    - uses: reviewdog/action-suggester@v1
+      if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+      with:
+        tool_name: black
