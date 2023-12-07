@@ -1,40 +1,22 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "pyonda"
 version = "0.3.1"
-description = 'Python tools to handle Onda formatted data'
+description = "Python tools to handle Onda formatted data"
+authors = ["Mkrtich Vatinyan <mkrtich.vatinyan@beacon.bio>"]
 readme = "README.md"
-requires-python = ">=3.8, <3.10"
-authors = [
-  { name = "Mkrtich Vatinyan", email = "mkrtich.vatinyan@beacon.bio" },
-]
 
-dependencies = [
-  "boto3==1.28.19",
-  "pyarrow==12.0.1",
-  "pandas==2.0.3",
-  "numpy==1.24.4",
-  "zstandard==0.21.0"
-]
+[tool.poetry.dependencies]
+python = ">=3.8, <3.10"
+boto3 = "~1.28.19"
+pyarrow = "~12.0.1"
+numpy = "~1.24.4"
+zstandard = "~0.21.0"
 
-[tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest",
-  "moto==4.1.15"
-]
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.3"
+coverage = "~7.3.2"
+moto = "~4.1.15"
 
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
