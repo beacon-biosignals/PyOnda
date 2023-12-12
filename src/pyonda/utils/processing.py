@@ -2,7 +2,7 @@ import uuid
 import pyarrow as pa
 
 
-def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring, version=5):
+def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring, version=None):
     """decode the UUID fields which are by default loaded as bytestrings by pandas. Due to endianness difference
     we need to reverse the bytearray before decoding the UUID to obtain the same hex string
 
@@ -11,7 +11,7 @@ def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring, version=5):
     value : bytestring
         coming from julia
     version: int
-        uuid version (from 1 to 5)
+        uuid version (from 1 to 5). None will automatically detect the version so prefer using None.
 
     Returns
     -------
