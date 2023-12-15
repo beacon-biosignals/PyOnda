@@ -20,9 +20,8 @@ def test_convert_julia_uuid_bytestring_to_uuid_version4():
     df4 = table4.to_pandas()
 
     expected_uuid = "094e4b16-21cd-4acc-b5a7-e16096cdc069"
-    map_func = lambda x : str(convert_julia_uuid_bytestring_to_uuid(x))
-    my_uuid = df4['col1'].map(map_func).iloc[0]
-    assert my_uuid == expected_uuid
+    my_uuid = df4['col1'].map(convert_julia_uuid_bytestring_to_uuid).iloc[0]
+    assert str(my_uuid) == expected_uuid
     assert my_uuid.version == 4
 
 def test_convert_julia_uuid_bytestring_to_uuid_version5():
@@ -43,7 +42,6 @@ def test_convert_julia_uuid_bytestring_to_uuid_version5():
     df5 = table5.to_pandas()
 
     expected_uuid = "0c4718ca-6f46-51a0-91c6-a0d671972447"
-    map_func = lambda x : str(convert_julia_uuid_bytestring_to_uuid(x))
-    my_uuid = df5['col1'].map(map_func).iloc[0]
-    assert my_uuid == expected_uuid
+    my_uuid = df5['col1'].map(convert_julia_uuid_bytestring_to_uuid).iloc[0]
+    assert str(my_uuid) == expected_uuid
     assert my_uuid.verions == 5
