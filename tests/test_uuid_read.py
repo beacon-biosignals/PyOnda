@@ -44,4 +44,4 @@ def test_convert_julia_uuid_bytestring_to_uuid_version5():
     expected_uuid = "0c4718ca-6f46-51a0-91c6-a0d671972447"
     my_uuid = df5['col1'].map(convert_julia_uuid_bytestring_to_uuid).iloc[0]
     assert str(my_uuid) == expected_uuid
-    assert my_uuid.verions == 5
+    assert my_uuid.version == 5
