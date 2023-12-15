@@ -29,7 +29,7 @@ def test_convert_julia_uuid_bytestring_to_uuid_version4():
     df4 = table4.to_pandas()
 
     expected_uuid4 = "094e4b16-21cd-4acc-b5a7-e16096cdc069"
-    my_uuid44 = df4['col1'].map(convert_julia_uuid_bytestring_to_uuid).iloc[0]
+    my_uuid4 = df4['col1'].map(convert_julia_uuid_bytestring_to_uuid).iloc[0]
     assert str(my_uuid4) == expected_uuid4
     assert my_uuid4.version == 4
 
