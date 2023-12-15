@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyonda"
-version = "0.3.2"
+version = "0.4.0"
 description = 'Python tools to handle Onda formatted data'
 readme = "README.md"
 requires-python = ">=3.8, <3.10"
