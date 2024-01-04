@@ -20,7 +20,7 @@ def convert_julia_uuid_bytestring_to_uuid(uuid_bytestring):
         return None
     x = bytearray(uuid_bytestring)
     x.reverse()
-    uuid_obj = uuid.UUID(bytes=bytes(x), version=4)
+    uuid_obj = uuid.UUID(bytes=bytes(x))
     return uuid_obj
 
 
