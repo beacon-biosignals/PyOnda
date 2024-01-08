@@ -125,7 +125,7 @@ def arrow_to_processed_pandas(table):
 
             dataframe["start"] = dataframe["span"].map(lambda x: x["start"] / 1e9)
             dataframe["stop"] = dataframe["span"].map(lambda x: x["stop"] / 1e9)
-            dataframe = dataframe.drop(['span'], axis=1)
+            dataframe = dataframe.drop(["span"], axis=1)
 
         check_if_schema_field_has_unsupported_binary_data(field)
 
