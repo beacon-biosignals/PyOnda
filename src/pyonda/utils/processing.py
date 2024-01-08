@@ -93,7 +93,7 @@ def arrow_to_processed_pandas(table):
     Used for arrow tables generated with Onda.jl to:
     - decode the UUID fields which are by default loaded as bytestrings by pandas. Due to endianness difference
     we need to reverse the bytearray before decoding the UUID to obtain the same hex string
-    - TODO leave timespan as a dict or convert ?
+    - convert timespan to two columns (start and stop), check that timespan unit is nanoseconds
 
     Parameters
     ----------
@@ -117,6 +117,15 @@ def arrow_to_processed_pandas(table):
             dataframe[schema_field] = dataframe[schema_field].map(
                 lambda x: x if x is None else list(x)
             )
+
+        if schema_field == "span":
+            span_unit = field.type[0].type.unit
+            if span_unit != "ns":
+                raise ValueError("Span field is expected to contain nanosecond values")
+
+            dataframe["start"] = dataframe["span"].map(lambda x: x["start"] / 1e9)
+            dataframe["stop"] = dataframe["span"].map(lambda x: x["stop"] / 1e9)
+            dataframe = dataframe.drop(['span'], axis=1)
 
         check_if_schema_field_has_unsupported_binary_data(field)
 
