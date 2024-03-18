@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyonda"
-version = "0.4.0"
+version = "0.4.1"
 description = "Python tools to handle Onda formatted data"
 authors = ["Mkrtich Vatinyan <mkrtich.vatinyan@beacon.bio>"]
 readme = "README.md"
