@@ -1,4 +1,6 @@
 import pytest
+import pandas as pd
+import uuid
 import pyarrow as pa
 from pyonda.utils.processing import (
     arrow_to_processed_pandas,
@@ -148,3 +150,18 @@ def test_arrow_to_processed_pandas(signal_arrow_table_path):
     ).read_all()
     df_processed = arrow_to_processed_pandas(table)
     assert_signal_arrow_dataframes_equal(df_processed)
+
+
+def test_arrow_has_col_with_list_of_binary_types():
+    # A list of binaries cant be converted easily to pandas with pyarrow
+    my_schema = pa.schema([pa.field("id_list", pa.list_(pa.binary(16)), nullable=True)])
+    my_list = [{"id_list": [uuid.uuid4().bytes, uuid.uuid4().bytes]}]
+    table = pa.Table.from_pylist(my_list, schema=my_schema)
+
+    with pytest.raises(pa.lib.ArrowNotImplementedError):
+        table.to_pandas()
+
+    d = {"id_list": [[uuid.uuid4() for _ in range(5)]]}
+    df = pd.DataFrame.from_dict(d)
+    df.to_csv("/home/ubuntu/repositories/PyOnda/tests/data/testttt.csv", index=False)
+    print(df)

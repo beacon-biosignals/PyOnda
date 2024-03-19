@@ -21,11 +21,4 @@ def assert_signal_arrow_dataframes_equal(df_processed):
     )
     df_expected["channels"] = df_expected["channels"].map(ast.literal_eval)
     df_expected["recording"] = df_expected["recording"].map(uuid.UUID)
-    df_expected["span"] = df_expected["span"].map(ast.literal_eval)
-
-    for df in [df_processed, df_expected]:
-        df["start_span"] = df["span"].map(lambda x: int(x["start"]))
-        df["stop_span"] = df["span"].map(lambda x: int(x["stop"]))
-        df.drop(["span"], axis=1, inplace=True)
-
-    pd.testing.assert_frame_equal(df, df_expected)
+    pd.testing.assert_frame_equal(df_processed, df_expected)
