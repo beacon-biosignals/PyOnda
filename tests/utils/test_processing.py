@@ -160,8 +160,4 @@ def test_arrow_has_col_with_list_of_binary_types():
 
     with pytest.raises(pa.lib.ArrowNotImplementedError):
         table.to_pandas()
-
-    d = {"id_list": [[uuid.uuid4() for _ in range(5)]]}
-    df = pd.DataFrame.from_dict(d)
-    df.to_csv("/home/ubuntu/repositories/PyOnda/tests/data/testttt.csv", index=False)
-    print(df)
+        
