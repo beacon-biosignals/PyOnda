@@ -1,4 +1,3 @@
-import os
 import io
 import pytest
 import numpy as np
@@ -9,16 +8,6 @@ from pyonda.load_lpcm import (
     load_array_from_lpcm_file_buffer,
     load_array_from_lpcm_file,
     load_array_from_lpcm_file_in_s3,
-)
-
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-    lpcm_file_s3_url,
-    expected_eeg_data,
 )
 
 

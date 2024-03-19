@@ -1,4 +1,3 @@
-import pytest
 import shutil
 import numpy as np
 
@@ -6,8 +5,6 @@ from pathlib import Path
 
 from pyonda.utils.compression import compress_file_to_zst
 from pyonda.utils.decompression import decompress_zstandard_file_to_stream
-
-from tests.fixtures import lpcm_file_path
 
 
 def test_compress_file_to_zst(tmpdir, lpcm_file_path):

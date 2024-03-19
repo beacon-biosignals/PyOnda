@@ -5,15 +5,6 @@ import boto3
 
 from pyonda.utils.s3_upload import upload_file_to_s3
 
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    signal_arrow_table_s3_url,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-)
-
 
 def test_upload_s3_file(s3, signal_arrow_table_s3_url, signal_arrow_table_path, tmpdir):
     upload_file_to_s3(

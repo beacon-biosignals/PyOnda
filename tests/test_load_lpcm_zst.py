@@ -1,4 +1,3 @@
-import os
 import pytest
 import numpy as np
 from pathlib import Path
@@ -7,16 +6,6 @@ from pyonda.load_arrow import load_table_from_arrow_file
 from pyonda.load_lpcm import (
     load_array_from_lpcm_zst_file,
     load_array_from_lpcm_zst_file_in_s3,
-)
-
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-    lpcm_zst_file_s3_url,
-    expected_ecg_data,
 )
 
 

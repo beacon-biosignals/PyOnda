@@ -106,6 +106,8 @@ def arrow_to_processed_pandas(table):
         arrow table converted to processed pandas dataframe
     """
     table_schema = table.schema
+
+    # to_pandas fails with some field types : FixedSizeBinaryType
     dataframe = table.to_pandas()
 
     for schema_field in table_schema.names:
@@ -118,6 +120,7 @@ def arrow_to_processed_pandas(table):
                 lambda x: x if x is None else list(x)
             )
 
+        # Break down the timespan into a start and stop columns (in seconds)
         if schema_field == "span":
             span_unit = field.type[0].type.unit
             if span_unit != "ns":

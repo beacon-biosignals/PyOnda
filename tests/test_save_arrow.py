@@ -4,15 +4,6 @@ from pyonda.load_arrow import (
     load_table_from_arrow_file,
     load_table_from_arrow_file_in_s3,
 )
-from tests.utils import assert_signal_arrow_dataframes_equal
-
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-)
 
 
 @pytest.fixture

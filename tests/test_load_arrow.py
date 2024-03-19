@@ -9,15 +9,6 @@ from pyonda.load_arrow import (
 )
 from tests.utils import assert_signal_arrow_dataframes_equal
 
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-    signal_arrow_table_s3_url,
-)
-
 
 def test_load_table_from_arrow_file_default_is_processed():
     signature = inspect.signature(load_table_from_arrow_file)
