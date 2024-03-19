@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyonda"
-version = "0.4.0"
+version = "0.4.1"
 description = "Python tools to handle Onda formatted data"
 authors = ["Mkrtich Vatinyan <mkrtich.vatinyan@beacon.bio>"]
 readme = "README.md"
@@ -12,6 +12,8 @@ pyarrow = "~12.0.1"
 pandas = "~2.0.3"
 numpy = "~1.24.4"
 zstandard = "~0.21.0"
+
+[tool.poetry.group.dev.dependencies]
 black = "^23.11.0"
 
 [tool.poetry.group.test.dependencies]
