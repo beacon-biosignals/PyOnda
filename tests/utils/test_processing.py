@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+
 import uuid
 import pyarrow as pa
 from pyonda.utils.processing import (
@@ -7,8 +8,8 @@ from pyonda.utils.processing import (
     convert_julia_uuid_bytestring_to_uuid,
     convert_python_uuid_to_uuid_bytestring,
     check_if_schema_field_has_unsupported_binary_data,
+    to_pandas_with_workaround_for_list_of_uuids,
 )
-from tests.utils import assert_signal_arrow_dataframes_equal
 
 
 def test_convert_julia_uuid():
@@ -144,20 +145,33 @@ def test_check_if_schema_field_has_nested_unsupported_binary_data():
     check_if_schema_field_has_unsupported_binary_data(field)
 
 
-def test_arrow_to_processed_pandas(signal_arrow_table_path):
+def test_arrow_to_processed_pandas(signal_arrow_table_path, reference_pandas_table):
     table = pa.ipc.open_file(
         pa.memory_map(str(signal_arrow_table_path), "r")
     ).read_all()
     df_processed = arrow_to_processed_pandas(table)
-    assert_signal_arrow_dataframes_equal(df_processed)
+    pd.testing.assert_frame_equal(df_processed, reference_pandas_table)
 
 
 def test_arrow_has_col_with_list_of_binary_types():
     # A list of binaries cant be converted easily to pandas with pyarrow
     my_schema = pa.schema([pa.field("id_list", pa.list_(pa.binary(16)), nullable=True)])
-    my_list = [{"id_list": [uuid.uuid4().bytes, uuid.uuid4().bytes]}]
+    for schema_field in my_schema.names:
+        field = my_schema.field(schema_field)
+        if (
+            type(field.type) == pa.ListType
+            and type(field.type.value_type) == pa.FixedSizeBinaryType
+        ):
+            print("ok")
+
+    my_list = [
+        {"id_list": [uuid.uuid4().bytes, uuid.uuid4().bytes]},
+        {"id_list": [uuid.uuid4().bytes, uuid.uuid4().bytes]},
+    ]
     table = pa.Table.from_pylist(my_list, schema=my_schema)
 
     with pytest.raises(pa.lib.ArrowNotImplementedError):
         table.to_pandas()
-        
+
+    # Workaround
+    df = to_pandas_with_workaround_for_list_of_uuids(table, my_schema)

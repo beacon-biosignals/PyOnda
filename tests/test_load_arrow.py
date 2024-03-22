@@ -1,5 +1,7 @@
 import inspect
 import io
+
+import pandas as pd
 import pyarrow as pa
 
 from pyonda.load_arrow import (
@@ -7,7 +9,6 @@ from pyonda.load_arrow import (
     load_table_from_arrow_file,
     load_table_from_arrow_file_in_s3,
 )
-from tests.utils import assert_signal_arrow_dataframes_equal
 
 
 def test_load_table_from_arrow_file_default_is_processed():
@@ -32,13 +33,13 @@ def test_load_table_from_arrow_file_buffer(signal_arrow_table_path):
 
 
 def test_load_table_from_arrow_file_buffer_as_processed_dataframe(
-    signal_arrow_table_path,
+    signal_arrow_table_path, reference_pandas_table
 ):
     with open(signal_arrow_table_path, "rb") as fh:
         buffer = io.BytesIO(fh.read())
 
     df = load_table_from_arrow_file_buffer(buffer, processed_pandas=True)
-    assert_signal_arrow_dataframes_equal(df)
+    pd.testing.assert_frame_equal(df, reference_pandas_table)
 
 
 def test_load_table_from_arrow_file(signal_arrow_table_path):
@@ -49,9 +50,11 @@ def test_load_table_from_arrow_file(signal_arrow_table_path):
     ), "Loaded arrow table is not as expected"
 
 
-def test_load_table_from_arrow_file_as_processed_dataframe(signal_arrow_table_path):
+def test_load_table_from_arrow_file_as_processed_dataframe(
+    signal_arrow_table_path, reference_pandas_table
+):
     df = load_table_from_arrow_file(signal_arrow_table_path, processed_pandas=True)
-    assert_signal_arrow_dataframes_equal(df)
+    pd.testing.assert_frame_equal(df, reference_pandas_table)
 
 
 def test_load_table_from_arrow_file_in_s3_default_is_processed():
@@ -77,9 +80,9 @@ def test_load_table_from_arrow_file_in_s3(
 
 
 def test_load_table_from_arrow_file_in_s3_as_processed_dataframe(
-    s3, signal_arrow_table_s3_url
+    s3, signal_arrow_table_s3_url, reference_pandas_table
 ):
     df = load_table_from_arrow_file_in_s3(
         signal_arrow_table_s3_url, processed_pandas=True
     )
-    assert_signal_arrow_dataframes_equal(df)
+    pd.testing.assert_frame_equal(df, reference_pandas_table)
