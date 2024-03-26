@@ -8,7 +8,7 @@ from pyonda.utils.processing import (
     convert_julia_uuid_bytestring_to_uuid,
     convert_python_uuid_to_uuid_bytestring,
     check_if_schema_field_has_unsupported_binary_data,
-    to_pandas_with_workaround_for_list_of_uuids,
+    to_pandas_extended,
 )
 
 
@@ -174,4 +174,4 @@ def test_arrow_has_col_with_list_of_binary_types():
         table.to_pandas()
 
     # Workaround
-    df = to_pandas_with_workaround_for_list_of_uuids(table, my_schema)
+    df = to_pandas_extended(table, my_schema)
