@@ -54,24 +54,24 @@ def check_if_schema_field_has_unsupported_binary_data(field):
     associate the field with 'ARROW:extension:name'-'JuliaLang.UUID' key value pair metadata.
     This is done to prevent any obscure data conversions because of the endianness difference between python and julia.
 
-    Examples : 
+    Examples :
 
     Field is a binary
       pyarrow.Field<X: fixed_size_binary[16] not null>
     It must have the desired metadata
-    
+
     Field is a struct
       pyarrow.Field<X: struct<A: fixed_size_binary[16] not null, B: fixed_size_binary[16] not null> not null>
-    Flattening will result in 
-      [pyarrow.Field<X.A: fixed_size_binary[16] not null>, pyarrow.Field<X.B: fixed_size_binary[16] not null>] 
+    Flattening will result in
+      [pyarrow.Field<X.A: fixed_size_binary[16] not null>, pyarrow.Field<X.B: fixed_size_binary[16] not null>]
     Each element of the list must have the desired metadata
 
     Field is a list
       pyarrow.Field<X: list<: fixed_size_binary[16] not null>>
-    We obtain the list value type with 
+    We obtain the list value type with
       schema.field("X").type.value_field -> pyarrow.Field<: fixed_size_binary[16] not null>
     It must have the desired metadata
-      
+
     Parameters
     ----------
     field : pyarrow.Field
@@ -101,19 +101,19 @@ def check_if_schema_field_has_unsupported_binary_data(field):
             metadata = {k.decode(): v.decode() for k, v in field.metadata.items()}
             if "ARROW:extension:name" not in metadata.keys():
                 raise ValueError(
-                    f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-                    "(no type extension, missing ARROW:extension:name key)"
+                    f"Unsupported FixedSizeBinaryType value encountered in {field.name} "
+                    + "(no type extension, missing ARROW:extension:name key)"
                 )
             type_extension = metadata["ARROW:extension:name"]
             if type_extension != "JuliaLang.UUID":
                 raise ValueError(
-                    f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-                    f"(unknown type extension {type_extension})"
+                    f"Unsupported FixedSizeBinaryType value encountered in {field.name} "
+                    + f"(unknown type extension {type_extension})"
                 )
         else:
             raise ValueError(
-                f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-                "(no metadata)"
+                f"Unsupported FixedSizeBinaryType value encountered in {field.name} "
+                + "(no metadata)"
             )
 
 
@@ -129,7 +129,7 @@ def to_pandas_extended(table, table_schema):
     This function proposes a workaround that applies the following steps:
     1. Detect columns of that type (list with FixedSizeBinaryType contents)
     2. Convert the initial table to a dictionary
-    3. Convert the contents of step 1. to lists of string 
+    3. Convert the contents of step 1. to lists of string
        representation of the binary hex
     4. Convert the new dictionary to a pandas dataframe
 
@@ -149,7 +149,7 @@ def to_pandas_extended(table, table_schema):
     dataframe: pd.DataFrame
         processed table converted to pandas format
     """
-    
+
     list_of_binaries_fields = []
     for field_name in table_schema.names:
         field = table_schema.field(field_name)
@@ -164,16 +164,17 @@ def to_pandas_extended(table, table_schema):
 
     table_dict = table.to_pydict()
     for field_name in list_of_binaries_fields:
-
         # Check for metadata
-        #check_if_schema_field_has_unsupported_binary_data(table_schema.field(field_name))
+        # check_if_schema_field_has_unsupported_binary_data(table_schema.field(field_name))
 
         dst_entries = []
         for src_entry in table_dict[field_name]:
             if src_entry is None:
                 dst_entry = None
             else:
-                dst_entry = [str(convert_julia_uuid_bytestring_to_uuid(x)) for x in src_entry]
+                dst_entry = [
+                    str(convert_julia_uuid_bytestring_to_uuid(x)) for x in src_entry
+                ]
             dst_entries.append(dst_entry)
 
         table_dict[field_name] = dst_entries
@@ -186,8 +187,12 @@ def break_down_span_into_start_and_stop(dataframe, span_field):
         raise ValueError("Span field is expected to contain nanosecond values")
 
     # Keep times in nanoseconds
-    dataframe["start"] = dataframe["span"].map(lambda x: int(x["start"].total_seconds() * 1e9))
-    dataframe["stop"] = dataframe["span"].map(lambda x: int(x["stop"].total_seconds() * 1e9))
+    dataframe["start"] = dataframe["span"].map(
+        lambda x: int(x["start"].total_seconds() * 1e9)
+    )
+    dataframe["stop"] = dataframe["span"].map(
+        lambda x: int(x["stop"].total_seconds() * 1e9)
+    )
     dataframe.drop(["span"], axis=1, inplace=True)
     return dataframe
 
