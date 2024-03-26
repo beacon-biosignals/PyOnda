@@ -48,32 +48,6 @@ def convert_python_uuid_to_uuid_bytestring(uuid_instance):
     return uuid_bytes
 
 
-def check_binary_field_has_metadata(field):
-    if type(field.type) != pa.lib.FixedSizeBinaryType:
-        raise ValueError(
-            f"Check function is called on a field that is not of FixedSizeBinaryType"
-        ) 
-    
-    if field.metadata is not None:
-        metadata = {k.decode(): v.decode() for k, v in field.metadata.items()}
-        if "ARROW:extension:name" not in metadata.keys():
-            raise ValueError(
-                f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-                "(no type extension, missing ARROW:extension:name key)"
-            )
-        type_extension = metadata["ARROW:extension:name"]
-        if type_extension != "JuliaLang.UUID":
-            raise ValueError(
-                f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-                f"(unknown type extension {type_extension})"
-            )
-    else:
-        raise ValueError(
-            f"Unsupported FixedSizeBinaryType value encountered in {field.name} " + 
-            "(no metadata)"
-        )
-    
-
 def check_if_schema_field_has_unsupported_binary_data(field):
     """Given a pyarrow schema field, check if its type is FixedSizeBinaryType or if it is a StructType
     check if any children have the FixedSizeBinaryType in a recursive manner. Raise ValueError if we cannot
