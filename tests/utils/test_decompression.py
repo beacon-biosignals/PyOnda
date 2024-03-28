@@ -1,5 +1,3 @@
-import pytest
-import os
 import shutil
 import numpy as np
 
@@ -11,8 +9,6 @@ from pyonda.utils.decompression import (
     decompress_zstandard_stream_to_file,
     decompress_zstandard_stream_to_stream,
 )
-
-from tests.fixtures import lpcm_zst_file_path
 
 
 def test_decompress_zstandard_file_to_folder(tmpdir, lpcm_zst_file_path):

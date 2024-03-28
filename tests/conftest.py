@@ -4,6 +4,7 @@ import os
 import boto3
 from pathlib import Path
 from moto import mock_s3
+from tests.utils import load_saved_processed_pandas
 
 
 @pytest.fixture
@@ -17,6 +18,14 @@ def lpcm_zst_file_path():
 @pytest.fixture
 def signal_arrow_table_path():
     return Path(os.path.abspath(__file__)).parent / "data/test.onda.signal.arrow"
+
+
+@pytest.fixture
+def reference_pandas_table():
+    path = (
+        Path(os.path.abspath(__file__)).parent / "data/test.onda.signal_processed.csv"
+    )
+    return load_saved_processed_pandas(path)
 
 
 @pytest.fixture

@@ -16,15 +16,6 @@ from pyonda.save_lpcm import (
     save_array_to_lpcm_zst_file_in_s3,
 )
 
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-    expected_eeg_data,
-)
-
 
 @pytest.fixture
 def ref_series(signal_arrow_table_path, lpcm_file_path):

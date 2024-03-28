@@ -10,15 +10,6 @@ from pyonda.utils.s3_download import (
     download_s3_fileobj,
 )
 
-from tests.fixtures import (
-    aws_credentials,
-    signal_arrow_table_path,
-    lpcm_file_path,
-    lpcm_zst_file_path,
-    s3,
-    signal_arrow_table_s3_url,
-)
-
 
 def test_path_is_an_s3_url():
     """Check that paths beginning with s3:// are considered s3 urls"""

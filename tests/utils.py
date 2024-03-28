@@ -1,31 +1,32 @@
 import pandas as pd
-
-
 import ast
-import os
-import uuid
-from pathlib import Path
 
 
-def assert_signal_arrow_dataframes_equal(df_processed):
-    """Load data/test.onda.signal_processed.csv as df, add some preprocessings to ensure
-    both dataframes are preprocessed similarly and apply pandas.testing.assert_frame_equal
+def load_saved_processed_pandas(filepath):
+    """We provide a utility function to load the output of
+    arrow_to_processed_pandas if it was saved on disk
+
+    We need to format some of the columns for the loaded table
+    to match the output arrow_to_processed_pandas
 
     Parameters
     ----------
-    df_processed : pandas.DataFrame
-        input dataframe to be tested
+    filepath : str or Path
+        path to the csv file
     """
-    df_expected = pd.read_csv(
-        Path(os.path.abspath(__file__)).parent / "data/test.onda.signal_processed.csv"
-    )
-    df_expected["channels"] = df_expected["channels"].map(ast.literal_eval)
-    df_expected["recording"] = df_expected["recording"].map(uuid.UUID)
-    df_expected["span"] = df_expected["span"].map(ast.literal_eval)
+    # If we load without dtype specification, most of the
+    # column dtypes might be inferred as just object types
+    df = pd.read_csv(filepath)
 
-    for df in [df_processed, df_expected]:
-        df["start_span"] = df["span"].map(lambda x: int(x["start"]))
-        df["stop_span"] = df["span"].map(lambda x: int(x["stop"]))
-        df.drop(["span"], axis=1, inplace=True)
+    # Typically if a column value contains a list, the value
+    # will be read as a string by default
+    def literal_eval(x):
+        return ast.literal_eval(x) if not pd.isna(x) else x
 
-    pd.testing.assert_frame_equal(df, df_expected)
+    for col in df.columns:
+        try:
+            df[col] = df[col].map(literal_eval)
+        except:
+            continue
+
+    return df

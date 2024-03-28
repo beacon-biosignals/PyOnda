@@ -1,13 +1,15 @@
 import pyarrow as pa
 
 from pyonda.utils.s3_download import download_s3_fileobj
-from pyonda.utils.processing import arrow_to_processed_pandas
+from pyonda.utils.processing import to_pandas_post_processed
 
 from botocore.client import BaseClient
 
 
 def load_table_from_arrow_file_buffer(buffer, processed_pandas=True):
     """Load arrow table into pyarrow table or pandas dataframe with a processing step
+    Note that UUID content will be converted to string representations if you convert
+    the table to pandas.
 
     Parameters
     ----------
@@ -23,12 +25,14 @@ def load_table_from_arrow_file_buffer(buffer, processed_pandas=True):
         table contents loaded into a pandas DataFrame
     """
     table = pa.ipc.open_file(buffer).read_all()
-    table = arrow_to_processed_pandas(table) if processed_pandas else table
+    table = to_pandas_post_processed(table) if processed_pandas else table
     return table
 
 
 def load_table_from_arrow_file(path_to_table, processed_pandas=True):
     """Load arrow table into pyarrow table or pandas dataframe with a processing step
+    Note that UUID content will be converted to string representations if you convert
+    the table to pandas.
 
     Parameters
     ----------
@@ -51,6 +55,8 @@ def load_table_from_arrow_file_in_s3(
     table_url, processed_pandas=True, client: BaseClient = None
 ):
     """Load arrow table from S3 into pyarrow table or pandas dataframe with a processing step
+    Note that UUID content will be converted to string representations if you convert
+    the table to pandas.
 
     Parameters
     ----------
