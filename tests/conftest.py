@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 import os
 import boto3
-from pyonda.utils.processing import load_saved_processed_pandas
 from pathlib import Path
 from moto import mock_s3
+from tests.utils import load_saved_processed_pandas
 
 
 @pytest.fixture

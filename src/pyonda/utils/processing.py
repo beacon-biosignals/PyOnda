@@ -1,6 +1,4 @@
 import uuid
-import ast
-import pandas as pd
 import pyarrow as pa
 
 
@@ -48,23 +46,18 @@ def convert_python_uuid_to_uuid_bytestring(uuid_instance):
     return uuid_bytes
 
 
-def check_if_schema_field_has_unsupported_binary_data(field):
-    """Given a pyarrow schema field, check if its type is FixedSizeBinaryType or if it is a StructType
-    check if any children have the FixedSizeBinaryType in a recursive manner. Raise ValueError if we cannot
+def check_schema_field_has_binary_data_with_valid_metadata(field):
+    """Given a pyarrow schema field, check if its type is FixedSizeBinaryTypeor a list with
+    FixedSizeBinaryType values in a recursive manner. Raise ValueError if we cannot
     associate the field with 'ARROW:extension:name'-'JuliaLang.UUID' key value pair metadata.
-    This is done to prevent any obscure data conversions because of the endianness difference between python and julia.
+    This is done to prevent any obscure data conversions because of the endianness difference 
+    between python and julia.
 
     Examples :
 
     Field is a binary
       pyarrow.Field<X: fixed_size_binary[16] not null>
     It must have the desired metadata
-
-    Field is a struct
-      pyarrow.Field<X: struct<A: fixed_size_binary[16] not null, B: fixed_size_binary[16] not null> not null>
-    Flattening will result in
-      [pyarrow.Field<X.A: fixed_size_binary[16] not null>, pyarrow.Field<X.B: fixed_size_binary[16] not null>]
-    Each element of the list must have the desired metadata
 
     Field is a list
       pyarrow.Field<X: list<: fixed_size_binary[16] not null>>
@@ -84,17 +77,13 @@ def check_if_schema_field_has_unsupported_binary_data(field):
     ValueError
         FixedSizeBinaryType field has metadata but no 'ARROW:extension:name' key
     ValueError
-        FixedSizeBinaryType field has metadata with a 'ARROW:extension:name' key but not a 'JuliaLang.UUID' value
+        FixedSizeBinaryType field has metadata with a 'ARROW:extension:name' key but 
+        not a 'JuliaLang.UUID' value
     """
-    if type(field.type) == pa.lib.StructType:
-        for child_field in field.flatten():
-            # Recursive call untill we hit the atomic element
-            check_if_schema_field_has_unsupported_binary_data(child_field)
-
-    elif type(field.type) == pa.lib.ListType:
+    if type(field.type) == pa.lib.ListType:
         value_field = field.type.value_field
         # Recursive call untill we hit the atomic element
-        check_if_schema_field_has_unsupported_binary_data(value_field)
+        check_schema_field_has_binary_data_with_valid_metadata(value_field)
 
     elif type(field.type) == pa.lib.FixedSizeBinaryType:
         if field.metadata is not None:
@@ -117,7 +106,28 @@ def check_if_schema_field_has_unsupported_binary_data(field):
             )
 
 
-def to_pandas_extended(table, table_schema):
+def _check_processing_supported(table):
+    for schema_field in table.schema.names:
+        field = table.schema.field(schema_field)
+
+        # Remove support for struct types with more than 1 level of nesting
+        if type(field.type) == pa.lib.StructType:
+            for child_field in field.flatten():
+                if type(child_field.type) == pa.lib.StructType:
+                    raise NotImplementedError(
+                        "Processing struct types with more than 1 level of nesting is not supported"
+                    )
+                
+                if type(child_field.type) == pa.lib.FixedSizeBinaryType:
+                    raise NotImplementedError(
+                        "Processing struct types with binary data is not supported"
+                    )
+
+        # Check metadata for fields that are supposed to be binary typed (uuids)
+        check_schema_field_has_binary_data_with_valid_metadata(field)
+
+
+def to_pandas_extended(table):
     """
     https://arrow.apache.org/docs/python/pandas.html#arrow-pandas-conversion
 
@@ -149,23 +159,27 @@ def to_pandas_extended(table, table_schema):
     dataframe: pd.DataFrame
         processed table converted to pandas format
     """
-
+    table_schema = table.schema
     list_of_binaries_fields = []
     for field_name in table_schema.names:
         field = table_schema.field(field_name)
+
         if (
             type(field.type) == pa.ListType
             and type(field.type.value_type) == pa.FixedSizeBinaryType
         ):
             list_of_binaries_fields.append(field_name)
+            
 
     if not len(list_of_binaries_fields):
         return table.to_pandas()
 
     table_dict = table.to_pydict()
     for field_name in list_of_binaries_fields:
-        # Check for metadata
-        # check_if_schema_field_has_unsupported_binary_data(table_schema.field(field_name))
+
+        # Run metadata check on those fields
+        field = table_schema.field(field_name)
+        check_schema_field_has_binary_data_with_valid_metadata(field)
 
         dst_entries = []
         for src_entry in table_dict[field_name]:
@@ -181,23 +195,7 @@ def to_pandas_extended(table, table_schema):
     return pa.Table.from_pydict(table_dict).to_pandas()
 
 
-def break_down_span_into_start_and_stop(dataframe, span_field):
-    span_unit = span_field.type[0].type.unit
-    if span_unit != "ns":
-        raise ValueError("Span field is expected to contain nanosecond values")
-
-    # Keep times in nanoseconds
-    dataframe["start"] = dataframe["span"].map(
-        lambda x: int(x["start"].total_seconds() * 1e9)
-    )
-    dataframe["stop"] = dataframe["span"].map(
-        lambda x: int(x["stop"].total_seconds() * 1e9)
-    )
-    dataframe.drop(["span"], axis=1, inplace=True)
-    return dataframe
-
-
-def arrow_to_processed_pandas(table):
+def to_pandas_post_processed(table):
     """Convert pyarrow table to a pandas dataframe with processing.
 
 
@@ -219,11 +217,15 @@ def arrow_to_processed_pandas(table):
     dataframe: pandas.DataFrame
         arrow table converted to processed pandas dataframe
     """
-    table_schema = table.schema
-    dataframe = to_pandas_extended(table, table_schema)
+    # Run checks on table to see if processing is allowed/supported
+    _check_processing_supported(table)
 
-    for schema_field in table_schema.names:
-        field = table_schema.field(schema_field)
+    # First apply to_pandas_extended
+    dataframe = to_pandas_extended(table)
+
+    # Then apply post processing step
+    for schema_field in table.schema.names:
+        field = table.schema.field(schema_field)
 
         # For a all columns where the value is the list, pass the type to pandas
         # When dataframe is loaded from storage, the field should be mapped with
@@ -236,16 +238,24 @@ def arrow_to_processed_pandas(table):
         # For the span field, we will break it down into two columns
         # start / stop that will contain values in nanoseconds
         if schema_field == "span":
-            dataframe = break_down_span_into_start_and_stop(dataframe, field)
+            span_unit = field.type[0].type.unit
+            if span_unit != "ns":
+                raise ValueError("Span field is expected to contain nanosecond values")
+            dataframe["start"] = dataframe["span"].map(
+                lambda x: int(x["start"].total_seconds() * 1e9)
+            )
+            dataframe["stop"] = dataframe["span"].map(
+                lambda x: int(x["stop"].total_seconds() * 1e9)
+            )
+            dataframe.drop(["span"], axis=1, inplace=True)
 
-        # Check metadata for fields that are supposed to be binary typed (uuids)
-        check_if_schema_field_has_unsupported_binary_data(field)
-        if field.metadata is None:
-            continue
-
+        # TODO add processing of structs with binary here if needed
+        
         # Convert JuliaLang.UUIDs with byte reversal
         # We do this only for fields that have the following key value pair in
         # the metadata : "ARROW:extension:name" - "JuliaLang.UUID"
+        if field.metadata is None:
+            continue
         metadata = {k.decode(): v.decode() for k, v in field.metadata.items()}
         if (
             "ARROW:extension:name" in metadata.keys()
@@ -258,33 +268,3 @@ def arrow_to_processed_pandas(table):
             )
 
     return dataframe
-
-
-def load_saved_processed_pandas(filepath):
-    """We provide a utility function to load the output of
-    arrow_to_processed_pandas if it was saved on disk
-
-    We need to format some of the columns for the loaded table
-    to match the output arrow_to_processed_pandas
-
-    Parameters
-    ----------
-    filepath : str or Path
-        path to the csv file
-    """
-    # If we load without dtype specification, most of the
-    # column dtypes might be inferred as just object types
-    df = pd.read_csv(filepath)
-
-    # Typically if a column value contains a list, the value
-    # will be read as a string by default
-    def literal_eval(x):
-        return ast.literal_eval(x) if not pd.isna(x) else x
-
-    for col in df.columns:
-        try:
-            df[col] = df[col].map(literal_eval)
-        except:
-            continue
-
-    return df
