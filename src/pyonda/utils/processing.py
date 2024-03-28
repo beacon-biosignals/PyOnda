@@ -50,7 +50,7 @@ def check_schema_field_has_binary_data_with_valid_metadata(field):
     """Given a pyarrow schema field, check if its type is FixedSizeBinaryTypeor a list with
     FixedSizeBinaryType values in a recursive manner. Raise ValueError if we cannot
     associate the field with 'ARROW:extension:name'-'JuliaLang.UUID' key value pair metadata.
-    This is done to prevent any obscure data conversions because of the endianness difference 
+    This is done to prevent any obscure data conversions because of the endianness difference
     between python and julia.
 
     Examples :
@@ -77,7 +77,7 @@ def check_schema_field_has_binary_data_with_valid_metadata(field):
     ValueError
         FixedSizeBinaryType field has metadata but no 'ARROW:extension:name' key
     ValueError
-        FixedSizeBinaryType field has metadata with a 'ARROW:extension:name' key but 
+        FixedSizeBinaryType field has metadata with a 'ARROW:extension:name' key but
         not a 'JuliaLang.UUID' value
     """
     if type(field.type) == pa.lib.ListType:
@@ -117,7 +117,7 @@ def _check_processing_supported(table):
                     raise NotImplementedError(
                         "Processing struct types with more than 1 level of nesting is not supported"
                     )
-                
+
                 if type(child_field.type) == pa.lib.FixedSizeBinaryType:
                     raise NotImplementedError(
                         "Processing struct types with binary data is not supported"
@@ -169,14 +169,12 @@ def to_pandas_extended(table):
             and type(field.type.value_type) == pa.FixedSizeBinaryType
         ):
             list_of_binaries_fields.append(field_name)
-            
 
     if not len(list_of_binaries_fields):
         return table.to_pandas()
 
     table_dict = table.to_pydict()
     for field_name in list_of_binaries_fields:
-
         # Run metadata check on those fields
         field = table_schema.field(field_name)
         check_schema_field_has_binary_data_with_valid_metadata(field)
@@ -250,7 +248,7 @@ def to_pandas_post_processed(table):
             dataframe.drop(["span"], axis=1, inplace=True)
 
         # TODO add processing of structs with binary here if needed
-        
+
         # Convert JuliaLang.UUIDs with byte reversal
         # We do this only for fields that have the following key value pair in
         # the metadata : "ARROW:extension:name" - "JuliaLang.UUID"

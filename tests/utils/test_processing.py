@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import pandas as pd
 
 import uuid
@@ -16,8 +15,7 @@ from pyonda.utils.processing import (
 # Test convert_julia_uuid_bytestring_to_uuid
 # Test convert_python_uuid_to_uuid_bytestring
 def test_uuid_conversion():
-
-    hex_str = '77bb8f87-cea8-4ce2-896f-2aba0d253288'
+    hex_str = "77bb8f87-cea8-4ce2-896f-2aba0d253288"
     ref_uuid = uuid.UUID(hex_str)
 
     julia_uuid_bytestring = bytearray(ref_uuid.bytes)
@@ -41,45 +39,50 @@ def test_uuid_conversion():
 def binary_fields():
     dtype = pa.binary(16)
     metadata_dict = {
-        'bad_metadata' : {b"some key": b"some value"},
-        'bad_metadata_key' : {b"ARROW:extension:name": b"JuliaLang.weird_UUID"},
-        'valid_metadata' : {b"ARROW:extension:name": b"JuliaLang.UUID"},
+        "bad_metadata": {b"some key": b"some value"},
+        "bad_metadata_key": {b"ARROW:extension:name": b"JuliaLang.weird_UUID"},
+        "valid_metadata": {b"ARROW:extension:name": b"JuliaLang.UUID"},
     }
-    fixtures = {'no_metadata': pa.field("no_metadata", dtype)}
-    for key in ['bad_metadata', 'bad_metadata_key', 'valid_metadata']:
+    fixtures = {"no_metadata": pa.field("no_metadata", dtype)}
+    for key in ["bad_metadata", "bad_metadata_key", "valid_metadata"]:
         fixtures[key] = pa.field(key, dtype, metadata=metadata_dict[key])
     return fixtures
 
 
 def test_schema_field_has_supported_binary_data(binary_fields):
-    check_schema_field_has_binary_data_with_valid_metadata(binary_fields['valid_metadata'])
+    check_schema_field_has_binary_data_with_valid_metadata(
+        binary_fields["valid_metadata"]
+    )
 
 
-@pytest.mark.parametrize('key', ['no_metadata', 'bad_metadata', 'bad_metadata_key'])
+@pytest.mark.parametrize("key", ["no_metadata", "bad_metadata", "bad_metadata_key"])
 def test_schema_field_has_unsupported_binary_data(binary_fields, key):
     with pytest.raises(ValueError):
         check_schema_field_has_binary_data_with_valid_metadata(binary_fields[key])
 
 
 def test_schema_field_is_list_with_supported_binary_data(binary_fields):
-    field = pa.field("list_of_valid_binary_types", 
-                     pa.list_(binary_fields['valid_metadata']))
+    field = pa.field(
+        "list_of_valid_binary_types", pa.list_(binary_fields["valid_metadata"])
+    )
     check_schema_field_has_binary_data_with_valid_metadata(field)
 
-    field = pa.field("list_of_valid_binary_types", 
-                     pa.list_(pa.list_(binary_fields['valid_metadata'])))
+    field = pa.field(
+        "list_of_valid_binary_types",
+        pa.list_(pa.list_(binary_fields["valid_metadata"])),
+    )
     check_schema_field_has_binary_data_with_valid_metadata(field)
 
 
-@pytest.mark.parametrize('key', ['no_metadata', 'bad_metadata', 'bad_metadata_key'])
+@pytest.mark.parametrize("key", ["no_metadata", "bad_metadata", "bad_metadata_key"])
 def test_schema_field_is_list_with_unsupported_binary_data(binary_fields, key):
-    field = pa.field("list_of_valid_binary_types", 
-                     pa.list_(binary_fields[key]))
+    field = pa.field("list_of_valid_binary_types", pa.list_(binary_fields[key]))
     with pytest.raises(ValueError):
         check_schema_field_has_binary_data_with_valid_metadata(field)
 
-    field = pa.field("list_of_valid_binary_types", 
-                     pa.list_(pa.list_(binary_fields[key])))
+    field = pa.field(
+        "list_of_valid_binary_types", pa.list_(pa.list_(binary_fields[key]))
+    )
     with pytest.raises(ValueError):
         check_schema_field_has_binary_data_with_valid_metadata(field)
 
@@ -97,7 +100,9 @@ def test_to_pandas_extended_no_list_of_binary_data():
 
 
 def test_to_pandas_extended():
-    binary_field = pa.field("bfield", pa.binary(16), metadata = {b"ARROW:extension:name": b"JuliaLang.UUID"})
+    binary_field = pa.field(
+        "bfield", pa.binary(16), metadata={b"ARROW:extension:name": b"JuliaLang.UUID"}
+    )
     my_schema = pa.schema([pa.field("id_list", pa.list_(binary_field), nullable=True)])
     my_list = [
         {"id_list": [uuid.uuid4().bytes, uuid.uuid4().bytes]},
@@ -110,20 +115,21 @@ def test_to_pandas_extended():
         table.to_pandas()
 
     # Success with extended function
-    # note that processing considers bytes are coming 
+    # note that processing considers bytes are coming
     # from julia so they will be reversed
     df = to_pandas_extended(table)
     for i in range(2):
-        row = df['id_list'].map(lambda x : [uuid.UUID(y) for y in x])[i]
-        ref = my_list[i]['id_list']
+        row = df["id_list"].map(lambda x: [uuid.UUID(y) for y in x])[i]
+        ref = my_list[i]["id_list"]
         for j in range(2):
             assert row[j] == convert_julia_uuid_bytestring_to_uuid(ref[j])
- 
+
 
 # Test global processing
 # TODO
 def test_check_processing_supported(table):
     pass
+
 
 # TODO
 def test_to_pandas_post_processed(signal_arrow_table_path, reference_pandas_table):
